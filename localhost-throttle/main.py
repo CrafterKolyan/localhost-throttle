@@ -13,27 +13,41 @@ class RedirectClient:
     self.in_socket = in_socket
     self.out_socket = out_socket
     self.buffer_size = buffer_size
-    self._running = None
-    self._thread = None
+    self._stopped = None
+    self._thread_in_to_out = None
+    self._thread_out_to_in = None
 
-  def start_redirect_blocking(self):
-    if self._running is None:
-      self._running = threading.Event()
-
+  def _start_redirect_blocking_in_to_out(self):
     in_socket = self.in_socket
     out_socket = self.out_socket
     buffer_size = self.buffer_size
-    while not self._running.isSet():
-      data = in_socket.recv(buffer_size)
-      out_socket.send(data)
+    while not self._stopped.isSet():
+      try:
+        data = in_socket.recv(buffer_size)
+        out_socket.send(data)
+      except OSError:
+        self._stopped.set()
 
-  def start_redirect_nonblocking(self):
-    self._running = threading.Event()
-    self._thread = threading.Thread(target=self.start_redirect_blocking)
-    self._thread.start()
+  def _start_redirect_blocking_out_to_in(self):
+    in_socket = self.in_socket
+    out_socket = self.out_socket
+    buffer_size = self.buffer_size
+    while not self._stopped.isSet():
+      try:
+        data = out_socket.recv(buffer_size)
+        in_socket.send(data)
+      except OSError:
+        self._stopped.set()
+
+  def start(self):
+    self._stopped = threading.Event()
+    self._thread_in_to_out = threading.Thread(target=self._start_redirect_blocking_in_to_out)
+    self._thread_in_to_out.start()
+    self._thread_out_to_in = threading.Thread(target=self._start_redirect_blocking_out_to_in)
+    self._thread_out_to_in.start()
 
   def stop(self):
-    self._running.set()
+    self._stopped.set()
 
 
 # TODO: Make hostname configurable
@@ -52,9 +66,7 @@ def redirect(protocol, in_port, out_port, hostname="", backlog=100):
       with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
         in_socket.connect(("localhost", in_port))
         redirect_in_to_client = RedirectClient(in_socket, clientsocket)
-        redirect_in_to_client.start_redirect_nonblocking()
-        redirect_client_to_in = RedirectClient(clientsocket, in_socket)
-        redirect_client_to_in.start_redirect_nonblocking()
+        redirect_in_to_client.start()
         time.sleep(5)
         clientsocket.close()
 
