@@ -41,7 +41,7 @@ pip install -r requirements-dev.txt
 pytest test -n auto --capture=no
 ```
 or<br>
-In VS Code: `Command Pallete` (Ctrl+Shift+P) -> `Tasks: Run Task` -> `"Run tests"`
+In VS Code: `Command Pallete` (Ctrl+Shift+P) -> `Tasks: Run Task` -> `Run tests`
 
 ### Deactivating environment
 ```
