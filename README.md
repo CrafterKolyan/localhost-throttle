@@ -18,6 +18,11 @@ localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp
 ## Current features
 - Redirection of TCP/UDP traffic from one port to another
 
+## Installing package
+```
+pip install .
+```
+
 ## Development
 ### Setting up environment
 ```
