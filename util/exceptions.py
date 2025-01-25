@@ -1,0 +1,2 @@
+class TimeoutExceeded(Exception):
+  pass
