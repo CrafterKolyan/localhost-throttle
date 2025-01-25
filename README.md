@@ -27,6 +27,7 @@ pip install .
 - Python 3.7+
 - `setuptools>=42`
 - `pip>=19`
+- OS that supports threads
 
 ## Development
 ### Setting up environment
