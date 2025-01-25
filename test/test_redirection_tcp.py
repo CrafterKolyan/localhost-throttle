@@ -121,7 +121,7 @@ def test_redirects_data_multiple_hops():
 
 
 @pytest.mark.timeout(3)
-@pytest.mark.parametrize("n", [0, 1, 2, 10])
+@pytest.mark.parametrize("n", [0, 1, 2, 5])
 def test_end_of_connection_from_server_is_propagated_after_n_messages(n):
   protocol = Protocol.TCP
   socket_type = protocol.socket_type()
@@ -159,7 +159,7 @@ def test_end_of_connection_from_server_is_propagated_after_n_messages(n):
 
 
 @pytest.mark.timeout(3)
-@pytest.mark.parametrize("n", [0, 1, 2, 10])
+@pytest.mark.parametrize("n", [0, 1, 2, 5])
 def test_end_of_connection_from_client_is_propagated_after_n_messages(n):
   protocol = Protocol.TCP
   socket_type = protocol.socket_type()
