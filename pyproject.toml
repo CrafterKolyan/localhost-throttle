@@ -1,3 +1,16 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "localhost-throttle"
+version = "0.0.1"
+description = "Tool to throttle or redirect your localhost connections"
+requires-python = ">=3.7"
+
+[project.scripts]
+localhost-throttle = "localhost_throttle.main:main"
+
 [tool.ruff]
 indent-width = 2
 

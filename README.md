@@ -3,7 +3,7 @@ Tool to throttle or redirect your localhost connections
 
 ## Usage
 ```
-python -m localhost_throttle --in-port <in-port> --out-port <out-port> --protocols tcp
+localhost-throttle --in-port <in-port> --out-port <out-port> --protocols tcp
 ```
 
 You should think about `localhost-throttle` as a wrapper around your server.<br>
@@ -12,7 +12,7 @@ You should think about `localhost-throttle` as a wrapper around your server.<br>
 
 ## Example:
 ```
-python -m localhost_throttle --in-port 8000 --out-port 8001 --protocols tcp
+localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp
 ```
 
 ## Current features
