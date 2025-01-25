@@ -26,7 +26,7 @@ python -m venv .venv
 .venv/Scripts/activate.sh   (for Unix)
 pip install -U setuptools
 python -m pip install -U pip
-python -m pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt
 ```
 
 ### Activating environment
