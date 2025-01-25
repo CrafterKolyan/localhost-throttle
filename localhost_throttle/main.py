@@ -1,6 +1,4 @@
-import socket
 import socketserver
-import contextlib
 import time
 import threading
 from .parser import create_parser
@@ -17,11 +15,17 @@ class CustomizableTCPServer(socketserver.TCPServer):
     request_queue_size=5,
     allow_reuse_address=False,
     allow_reuse_port=False,
+    shutdown_requests=True,
   ):
     self.request_queue_size = request_queue_size
     self.allow_reuse_address = allow_reuse_address
     self.allow_reuse_port = allow_reuse_port
+    self.shutdown_requests = shutdown_requests
     super().__init__(server_address, RequestHandlerClass, bind_and_activate=bind_and_activate)
+
+  def shutdown_request(self, request):
+    if self.shutdown_requests:
+      super().shutdown_request(request)
 
 
 def create_tcp_server_request_handler_with_payload(*, in_port, socket_type):
@@ -35,8 +39,6 @@ def create_tcp_server_request_handler_with_payload(*, in_port, socket_type):
           daemon=True,
         )
         thread.start()
-        # TODO: Remove this
-        time.sleep(5)
 
       def finish(self):
         pass
@@ -58,6 +60,7 @@ def redirect(protocol, in_port, out_port, hostname="", request_queue_size=100, p
     create_tcp_server_request_handler_with_payload(in_port=in_port, socket_type=socket_type),
     bind_and_activate=True,
     request_queue_size=request_queue_size,
+    shutdown_requests=False,
   ) as server:
     server.serve_forever(poll_interval=poll_interval)
 
