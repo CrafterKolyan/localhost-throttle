@@ -1,2 +1,5 @@
 [tool.ruff]
 indent-width = 2
+
+[tool.pytest.ini_options]
+timeout = 1
