@@ -40,6 +40,7 @@ pip install -r requirements-dev.txt
 ```
 pytest test -n auto --capture=no
 ```
+or 
 
 ### Deactivating environment
 ```
