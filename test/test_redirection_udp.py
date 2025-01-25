@@ -74,6 +74,38 @@ def test_redirects_data_out_to_in_to_out():
 
 
 @pytest.mark.timeout(3)
+@pytest.mark.xfail(reason="It is currently a known issue that UDP client gets data from a different port")
+def test_redirects_data_client_receives_data_from_the_same_port():
+  protocol = Protocol.UDP
+  socket_type = protocol.socket_type()
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
+      in_socket.bind(("localhost", 0))
+      in_port = in_socket.getsockname()[1]
+      ports = random_ports(size=1)
+      out_port = ports[0]
+
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
+      try:
+        time.sleep(DELAY_TO_START_UP)
+        data_to_send = b"1"
+        out_socket.sendto(data_to_send, ("localhost", out_port))
+        data_to_receive, addr = in_socket.recvfrom(len(data_to_send))
+        assert data_to_send == data_to_receive, "Data received is not equal to data send"
+
+        data_to_send = b"2"
+        in_socket.sendto(data_to_send, addr)
+        data_to_receive, addr = out_socket.recvfrom(len(data_to_send))
+        assert data_to_send == data_to_receive, "Data received is not equal to data send"
+        assert addr[1] == out_port, (
+          f"Port for client's addressee has changed. (client sent message to: '{out_port}' but received from '{addr[1]}')"
+        )
+
+      finally:
+        process.kill()
+
+
+@pytest.mark.timeout(3)
 def test_redirects_data_multiple_hops():
   protocol = Protocol.UDP
   socket_type = protocol.socket_type()

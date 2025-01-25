@@ -17,3 +17,6 @@ python -m localhost_throttle --in-port 8000 --out-port 8001 --protocols tcp
 
 ## Current features
 - Redirection of TCP/UDP traffic from one port to another
+
+## Known bugs
+- UDP client will receive traffic from a newly generated socket ()
