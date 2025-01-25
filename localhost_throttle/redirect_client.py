@@ -19,10 +19,11 @@ class RedirectClientTCP:
     while not self._stopped.isSet():
       try:
         data = in_socket.recv(buffer_size)
-        out_socket.send(data)
         if len(data) == 0:
+          out_socket.shutdown(socket.SHUT_RDWR)
           self._stopped.set()
           break
+        out_socket.send(data)
       except OSError:
         self._stopped.set()
 

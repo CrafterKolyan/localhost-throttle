@@ -62,12 +62,12 @@ def test_redirects_data_out_to_in_to_out():
         data_to_send = b"1"
         out_socket.sendto(data_to_send, ("localhost", out_port))
         data_to_receive, addr = in_socket.recvfrom(len(data_to_send))
-        assert data_to_send == data_to_receive, "Data received is not equal to data send"
+        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
 
         data_to_send = b"2"
         in_socket.sendto(data_to_send, addr)
         data_to_receive, addr = out_socket.recvfrom(len(data_to_send))
-        assert data_to_send == data_to_receive, "Data received is not equal to data send"
+        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
 
       finally:
         process.kill()
@@ -90,12 +90,12 @@ def test_redirects_data_client_receives_data_from_the_same_port():
         data_to_send = b"1"
         out_socket.sendto(data_to_send, ("localhost", out_port))
         data_to_receive, addr = in_socket.recvfrom(len(data_to_send))
-        assert data_to_send == data_to_receive, "Data received is not equal to data send"
+        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
 
         data_to_send = b"2"
         in_socket.sendto(data_to_send, addr)
         data_to_receive, addr = out_socket.recvfrom(len(data_to_send))
-        assert data_to_send == data_to_receive, "Data received is not equal to data send"
+        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
         assert addr[1] == out_port, (
           f"Port for client's addressee has changed. (client sent message to: '{out_port}' but received from '{addr[1]}')"
         )
