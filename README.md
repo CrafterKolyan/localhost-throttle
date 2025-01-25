@@ -23,20 +23,25 @@ python -m localhost_throttle --in-port 8000 --out-port 8001 --protocols tcp
 ```
 python -m venv .venv
 .venv\Scripts\activate.bat  (for Windows)
-.venv/Scripts/activate.sh   (for Unix)
+.venv/Scripts/activate      (for Unix)
 pip install -U setuptools
 python -m pip install -U pip
 pip install -r requirements-dev.txt
 ```
 
-### Activating environment
+### Enabling environment
 ```
 .venv\Scripts\activate.bat  (for Windows)
-.venv/Scripts/activate.sh   (for Unix)
+.venv/Scripts/activate      (for Unix)
 ```
 
 
 ### Running tests
 ```
 pytest test -n auto --capture=no
+```
+
+### Deactivating environment
+```
+.venv\Scripts\deactivate.bat
 ```
