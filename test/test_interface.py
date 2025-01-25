@@ -57,26 +57,6 @@ def test_can_be_killed_with_CTRL_BREAK_on_windows():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.CTRL_BREAK_EVENT)
-    process.communicate(timeout=1)
-  finally:
-    process.kill()
-
-
-@pytest.mark.timeout(3)
-@pytest.mark.skipif(sys.platform != "win32", reason="signal.CTRL_C_EVENT exists only on Windows")
-@pytest.mark.xfail(reason="It is known that Ctrl+C on windows doesn't kill the localhost-throttle")
-def test_can_be_killed_with_CTRL_C_on_windows():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
-      in_socket.bind(("localhost", 0))
-      in_port = in_socket.getsockname()[1]
-      out_socket.bind(("localhost", 0))
-      out_port = out_socket.getsockname()[1]
-  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
-  try:
-    # Give some time to start up
-    time.sleep(DELAY_TO_START_UP)
-    process.send_signal(signal.CTRL_C_EVENT)
-    process.communicate(timeout=1)
+    process.communicate(timeout=0.3)
   finally:
     process.kill()

@@ -5,6 +5,7 @@ from .constants import DEFAULT_CWD, MODULE_NAME
 
 
 def spawn_localhost_throttle(*, in_port, out_port, protocols):
+  creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
   return subprocess.Popen(
     [
       sys.executable,
@@ -21,5 +22,5 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols):
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
     cwd=DEFAULT_CWD,
-    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+    creationflags=creationflags,
   )
