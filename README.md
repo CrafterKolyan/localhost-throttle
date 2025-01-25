@@ -8,7 +8,7 @@ python -m localhost_throttle --in-port <in-port> --out-port <out-port> --protoco
 
 You should think about `localhost-throttle` as a wrapper around your server.<br>
 `in-port` means the port on which the server listens.<br>
-`out-port` means the port on which `localhost-throttle` will listen and to which client should subscribe
+`out-port` means the port on which `localhost-throttle` will listen and to which client should subscribe.
 
 ## Example:
 ```
