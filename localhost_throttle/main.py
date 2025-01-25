@@ -18,8 +18,11 @@ def localhost_throttle(in_port, out_port, protocols):
     raise NotImplementedError("Currently redirection of 2 protocols at the same time is not supported")
 
   logging.basicConfig(level=logging.INFO)
-  for protocol in protocols:
-    redirect(protocol, in_port, out_port)
+  try:
+    for protocol in protocols:
+      redirect(protocol, in_port, out_port)
+  except KeyboardInterrupt:
+    pass
 
 
 def main():
