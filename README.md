@@ -1,7 +1,7 @@
 # localhost-throttle
 Tool to throttle or redirect your localhost connections
 
-Currently only supports redirection of traffic and only for 5 seconds.
+Currently only supports redirection of **TCP** traffic and only for 5 seconds.
 
 ## Usage
 ```
