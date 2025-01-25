@@ -42,34 +42,36 @@ class RedirectClientTCP:
 
 class RedirectClientUDP:
   # TODO: Customize buffer_size
-  def __init__(self, in_addr, out_addr, in_out_socket, buffer_size=65536):
+  def __init__(self, in_addr, out_addr, in_socket, out_socket, buffer_size=65536):
     self.in_addr = in_addr
-    self.in_out_socket = in_out_socket
+    self.in_socket = in_socket
+    self.out_socket = out_socket
     self.out_addr = out_addr
     self.buffer_size = buffer_size
     self._stopped = None
     self._thread = None
 
-  def _start_redirect_blocking(self, in_addr, out_addr, socket, first_message):
+  def _start_redirect_blocking(self, in_addr, out_addr, in_socket, out_socket, first_message):
     buffer_size = self.buffer_size
-    socket.sendto(first_message, in_addr)
-    in_addr, out_addr = out_addr, in_addr
+    in_socket.sendto(first_message, in_addr)
     while not self._stopped.isSet():
       try:
-        data, _ = socket.recvfrom(buffer_size)
-        socket.sendto(data, in_addr)
+        data, _ = in_socket.recvfrom(buffer_size)
+        out_socket.sendto(data, out_addr)
         if len(data) == 0:
           self._stopped.set()
           break
 
-        in_addr, out_addr = out_addr, in_addr
+        # in_addr, out_addr = out_addr, in_addr
       except OSError:
         self._stopped.set()
 
   def start(self, first_message):
     self._stopped = threading.Event()
     self._thread = threading.Thread(
-      target=self._start_redirect_blocking, args=(self.in_addr, self.out_addr, self.in_out_socket, first_message), daemon=True
+      target=self._start_redirect_blocking,
+      args=(self.in_addr, self.out_addr, self.in_socket, self.out_socket, first_message),
+      daemon=True,
     )
     self._thread.start()
 
@@ -86,8 +88,9 @@ def redirect_and_close_on_exception_tcp(*, client_socket, in_port):
       redirect_in_to_client._stopped.wait()
 
 
-def redirect_and_close_on_exception_udp(*, in_port, client_address, first_message):
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as in_out_socket:
-    redirect_in_to_client = RedirectClientUDP(("localhost", in_port), client_address, in_out_socket)
+def redirect_and_close_on_exception_udp(*, in_port, client_address, first_message, out_socket, socket_obj):
+  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as in_socket:
+    socket_obj.append(in_socket)
+    redirect_in_to_client = RedirectClientUDP(("localhost", in_port), client_address, in_socket, out_socket)
     redirect_in_to_client.start(first_message)
     redirect_in_to_client._stopped.wait()

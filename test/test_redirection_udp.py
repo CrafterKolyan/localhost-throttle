@@ -74,7 +74,6 @@ def test_redirects_data_out_to_in_to_out():
 
 
 @pytest.mark.timeout(3)
-@pytest.mark.xfail(reason="It is currently a known issue that UDP client gets data from a different port")
 def test_redirects_data_client_receives_data_from_the_same_port():
   protocol = Protocol.UDP
   socket_type = protocol.socket_type()
