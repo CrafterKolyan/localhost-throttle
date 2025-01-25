@@ -16,14 +16,16 @@ def random_port():
 
 @pytest.mark.timeout(5)
 def test_redirects_data():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
       out_port = random_port()
 
-      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()
@@ -37,14 +39,16 @@ def test_redirects_data():
 
 @pytest.mark.timeout(3)
 def test_redirects_data_in_opposite_direction():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
       out_port = random_port()
 
-      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()
@@ -58,14 +62,16 @@ def test_redirects_data_in_opposite_direction():
 
 @pytest.mark.timeout(3)
 def test_redirects_data_back_and_forth():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
       out_port = random_port()
 
-      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()
