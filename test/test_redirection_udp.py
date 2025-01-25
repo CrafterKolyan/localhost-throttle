@@ -71,3 +71,31 @@ def test_redirects_data_out_to_in_to_out():
 
       finally:
         process.kill()
+
+
+@pytest.mark.timeout(3)
+def test_redirects_data_multiple_hops():
+  protocol = Protocol.UDP
+  socket_type = protocol.socket_type()
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
+      in_socket.bind(("localhost", 0))
+      in_port = in_socket.getsockname()[1]
+      ports = random_ports(size=1)
+      out_port = ports[0]
+
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
+      try:
+        time.sleep(DELAY_TO_START_UP)
+
+        messages = [str(x).encode("utf-8") for x in range(100)]
+        out_addr = ("localhost", out_port)
+        for data_to_send in messages:
+          out_socket.sendto(data_to_send, out_addr)
+          data_to_receive, in_addr = in_socket.recvfrom(len(data_to_send))
+          assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+          in_socket, out_socket = out_socket, in_socket
+          in_addr, out_addr = out_addr, in_addr
+
+      finally:
+        process.kill()
