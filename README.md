@@ -23,6 +23,11 @@ localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp
 pip install .
 ```
 
+### Requirements
+- Python 3.7+
+- `setuptools>=42`
+- `pip>=19`
+
 ## Development
 ### Setting up environment
 ```
