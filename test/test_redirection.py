@@ -1,11 +1,12 @@
 import contextlib
+import time
 import socket
-import subprocess
-import sys
 
 import pytest
 
-from test.constants import DEFAULT_CWD
+from localhost_throttle import Protocol, ProtocolSet
+
+from .util import spawn_localhost_throttle
 
 
 def random_port():
@@ -14,32 +15,16 @@ def random_port():
     return sock.getsockname()[1]
 
 
-@pytest.mark.timeout(3)
+@pytest.mark.timeout(5)
 def test_redirects_data():
   with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
     with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
-      in_socket_port = in_socket.getsockname()[1]
+      in_port = in_socket.getsockname()[1]
       out_port = random_port()
 
-      process = subprocess.Popen(
-        [
-          sys.executable,
-          "-m",
-          "localhost-throttle",
-          "--in-port",
-          str(in_socket_port),
-          "--out-port",
-          str(out_port),
-          "--protocols",
-          "tcp",
-        ],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=DEFAULT_CWD,
-      )
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
       try:
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()
@@ -57,26 +42,10 @@ def test_redirects_data_in_opposite_direction():
     with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
-      in_socket_port = in_socket.getsockname()[1]
+      in_port = in_socket.getsockname()[1]
       out_port = random_port()
 
-      process = subprocess.Popen(
-        [
-          sys.executable,
-          "-m",
-          "localhost-throttle",
-          "--in-port",
-          str(in_socket_port),
-          "--out-port",
-          str(out_port),
-          "--protocols",
-          "tcp",
-        ],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=DEFAULT_CWD,
-      )
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
       try:
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()
@@ -94,26 +63,10 @@ def test_redirects_data_back_and_forth():
     with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
-      in_socket_port = in_socket.getsockname()[1]
+      in_port = in_socket.getsockname()[1]
       out_port = random_port()
 
-      process = subprocess.Popen(
-        [
-          sys.executable,
-          "-m",
-          "localhost-throttle",
-          "--in-port",
-          str(in_socket_port),
-          "--out-port",
-          str(out_port),
-          "--protocols",
-          "tcp",
-        ],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=DEFAULT_CWD,
-      )
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
       try:
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()

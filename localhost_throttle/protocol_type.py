@@ -17,14 +17,19 @@ class Protocol(enum.Enum):
       case _:
         raise ValueError(f"'{str}' is not a valid Protocol. Only 'tcp' and 'udp' are supported")
 
+  def __str__(self):
+    match self:
+      case Protocol.TCP:
+        return "tcp"
+      case Protocol.UDP:
+        return "udp"
+
   def socket_type(self):
     match self:
       case Protocol.TCP:
         return socket.SOCK_STREAM
       case Protocol.UDP:
         return socket.SOCK_DGRAM
-      case _:
-        raise ValueError(f"Protocol '{self!r}' is not supported yet")
 
 
 class ProtocolSet(set):
@@ -34,3 +39,10 @@ class ProtocolSet(set):
     protocols = str.split(",")
     protocols = [Protocol.from_string(x) for x in protocols]
     return ProtocolSet(protocols)
+
+  @staticmethod
+  def from_iterable(protocols):
+    return ProtocolSet(protocols)
+
+  def __str__(self):
+    return ",".join(str(x) for x in self)
