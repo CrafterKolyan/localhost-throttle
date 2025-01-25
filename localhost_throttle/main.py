@@ -1,5 +1,4 @@
 import socketserver
-import time
 import threading
 from .parser import create_parser
 from .protocol_type import Protocol
