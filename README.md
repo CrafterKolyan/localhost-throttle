@@ -17,3 +17,26 @@ python -m localhost_throttle --in-port 8000 --out-port 8001 --protocols tcp
 
 ## Current features
 - Redirection of TCP/UDP traffic from one port to another
+
+## Development
+### Setting up environment
+```
+python -m venv .venv
+.venv\Scripts\activate.bat  (for Windows)
+.venv/Scripts/activate.sh   (for Unix)
+pip install -U setuptools
+python -m pip install -U pip
+python -m pip install -r requirements-dev.txt
+```
+
+### Activating environment
+```
+.venv\Scripts\activate.bat  (for Windows)
+.venv/Scripts/activate.sh   (for Unix)
+```
+
+
+### Running tests
+```
+pytest test -n auto --capture=no
+```
