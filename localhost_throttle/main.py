@@ -23,9 +23,10 @@ class CustomizableTCPServer(socketserver.TCPServer):
     self.shutdown_requests = shutdown_requests
     super().__init__(server_address, RequestHandlerClass, bind_and_activate=bind_and_activate)
 
-  def shutdown_request(self, request):
+  def process_request(self, request, client_address):
+    self.finish_request(request, client_address)
     if self.shutdown_requests:
-      super().shutdown_request(request)
+      self.shutdown_request(request)
 
 
 def create_tcp_server_request_handler_with_payload(*, in_port, socket_type):
