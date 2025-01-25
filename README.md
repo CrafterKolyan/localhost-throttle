@@ -1,18 +1,19 @@
 # localhost-throttle
 Tool to throttle or redirect your localhost connections
 
-Currently only supports redirection of **TCP** traffic.
-
 ## Usage
 ```
-python -m localhost-throttle --in-port <in-port> --out-port <out-port> --protocols tcp
+python -m localhost_throttle --in-port <in-port> --out-port <out-port> --protocols tcp
 ```
+
+You should think about `localhost-throttle` as a wrapper around your server.<br>
+`in-port` means the port on which the server listens.<br>
+`out-port` means the port on which `localhost-throttle` will listen and to which client should subscribe
 
 ## Example:
 ```
-python -m localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp
+python -m localhost_throttle --in-port 8000 --out-port 8001 --protocols tcp
 ```
 
 ## Current features
-- Redirection of TCP traffic from one port to another
-- Pretty hard to kill on Windows (unintended)
+- Redirection of TCP/UDP traffic from one port to another
