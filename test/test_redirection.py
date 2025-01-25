@@ -1,5 +1,4 @@
 import contextlib
-import time
 import socket
 
 import pytest
