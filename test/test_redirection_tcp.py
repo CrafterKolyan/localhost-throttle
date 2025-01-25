@@ -121,7 +121,8 @@ def test_redirects_data_multiple_hops():
 
 
 @pytest.mark.timeout(3)
-def test_end_of_connection_is_propagated():
+@pytest.mark.parametrize("n", [0, 1, 2, 10])
+def test_end_of_connection_from_server_is_propagated_after_n_messages(n):
   protocol = Protocol.TCP
   socket_type = protocol.socket_type()
   with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
@@ -136,18 +137,62 @@ def test_end_of_connection_is_propagated():
         time.sleep(DELAY_TO_START_UP)
         out_socket.connect(("localhost", out_port))
         in_socket_out, _ = in_socket.accept()
-        data_to_send = b"1"
-        in_socket_out.send(data_to_send)
-        data_to_receive = out_socket.recv(len(data_to_send))
-        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
 
-        data_to_send = b"2"
-        out_socket.send(data_to_send)
-        data_to_receive = in_socket_out.recv(len(data_to_send))
-        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+        messages = [str(x).encode("utf-8") for x in range(2 * n)]
+        for i in range(n):
+          data_to_send = messages[2 * i]
+          in_socket_out.send(data_to_send)
+          data_to_receive = out_socket.recv(len(data_to_send))
+          assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+
+          data_to_send = messages[2 * i + 1]
+          out_socket.send(data_to_send)
+          data_to_receive = in_socket_out.recv(len(data_to_send))
+          assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
 
         in_socket_out.shutdown(socket.SHUT_RDWR)
         data_to_receive = out_socket.recv(1)
+        expected = b""
+        assert data_to_receive == expected, f"Data received is not equal to data send. ({expected=}, {data_to_receive=})"
+      finally:
+        process.kill()
+
+
+@pytest.mark.timeout(3)
+@pytest.mark.parametrize("n", [0, 1, 2, 10])
+def test_end_of_connection_from_client_is_propagated_after_n_messages(n):
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as in_socket:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
+      in_socket.bind(("localhost", 0))
+      in_socket.listen(1)
+      in_port = in_socket.getsockname()[1]
+      out_port = random_port()
+
+      process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
+      try:
+        time.sleep(DELAY_TO_START_UP)
+        out_socket.connect(("localhost", out_port))
+        in_socket_out, _ = in_socket.accept()
+
+        messages = [str(x).encode("utf-8") for x in range(2 * n - 1)]
+        for i in range(n):
+          data_to_send = messages[2 * i]
+          in_socket_out.send(data_to_send)
+          data_to_receive = out_socket.recv(len(data_to_send))
+          assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+
+          if i + 1 != n:
+            data_to_send = messages[2 * i + 1]
+            out_socket.send(data_to_send)
+            data_to_receive = in_socket_out.recv(len(data_to_send))
+            assert data_to_send == data_to_receive, (
+              f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+            )
+
+        out_socket.shutdown(socket.SHUT_RDWR)
+        data_to_receive = in_socket_out.recv(1)
         expected = b""
         assert data_to_receive == expected, f"Data received is not equal to data send. ({expected=}, {data_to_receive=})"
       finally:
