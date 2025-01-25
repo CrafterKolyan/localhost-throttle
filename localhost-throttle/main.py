@@ -2,6 +2,7 @@ import socket
 import contextlib
 import threading
 from .parser import create_parser
+from .protocol_type import Protocol
 
 import time
 
@@ -38,6 +39,8 @@ class RedirectClient:
 # TODO: Make hostname configurable
 # TODO: Make backlog configurable
 def redirect(protocol, in_port, out_port, hostname="", backlog=100):
+  if protocol == Protocol.UDP:
+    raise NotImplementedError("Redirecting UDP protocol/UDP datagrams is not supported yet")
   socket_type = protocol.socket_type()
   with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
     out_socket.bind((hostname, out_port))
