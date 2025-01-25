@@ -1,3 +1,4 @@
+import logging
 import socketserver
 import threading
 
@@ -28,23 +29,22 @@ class CustomizableTCPServer(socketserver.TCPServer):
 
 
 def create_tcp_server_request_handler_with_payload(*, in_port):
-  def create_tcp_server_request_handler(*args, **kwargs):
-    class TCPServerRequestHandler(socketserver.StreamRequestHandler):
-      def handle(self):
-        client_socket = self.request
-        thread = threading.Thread(
-          target=redirect_and_close_on_exception_tcp,
-          kwargs={"client_socket": client_socket, "in_port": in_port},
-          daemon=True,
-        )
-        thread.start()
+  class TCPServerRequestHandler(socketserver.StreamRequestHandler):
+    def handle(self):
+      client_socket = self.request
+      client_address = self.client_address
+      logging.info(f"Received new TCP connection from {client_address}")
+      thread = threading.Thread(
+        target=redirect_and_close_on_exception_tcp,
+        kwargs={"client_socket": client_socket, "client_address": client_address, "in_port": in_port},
+        daemon=True,
+      )
+      thread.start()
 
-      def finish(self):
-        pass
+    def finish(self):
+      pass
 
-    return TCPServerRequestHandler(*args, **kwargs)
-
-  return create_tcp_server_request_handler
+  return TCPServerRequestHandler
 
 
 # TODO: Make hostname configurable

@@ -1,4 +1,5 @@
 import contextlib
+import logging
 import threading
 import socket
 
@@ -18,10 +19,10 @@ class RedirectClientTCP:
     while not self._stopped.isSet():
       try:
         data = in_socket.recv(buffer_size)
+        out_socket.send(data)
         if len(data) == 0:
           self._stopped.set()
           break
-        out_socket.send(data)
       except OSError:
         self._stopped.set()
 
@@ -79,13 +80,14 @@ class RedirectClientUDP:
     self._stopped.set()
 
 
-def redirect_and_close_on_exception_tcp(*, client_socket, in_port):
+def redirect_and_close_on_exception_tcp(*, client_socket, client_address, in_port):
   with contextlib.closing(client_socket) as client_socket:
     with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
       in_socket.connect(("localhost", in_port))
       redirect_in_to_client = RedirectClientTCP(in_socket, client_socket)
       redirect_in_to_client.start()
       redirect_in_to_client._stopped.wait()
+  logging.info(f"Closed connection to {client_address}")
 
 
 def redirect_and_close_on_exception_udp(*, in_port, client_address, first_message, out_socket, socket_obj):
@@ -94,3 +96,4 @@ def redirect_and_close_on_exception_udp(*, in_port, client_address, first_messag
     redirect_in_to_client = RedirectClientUDP(("localhost", in_port), client_address, in_socket, out_socket)
     redirect_in_to_client.start(first_message)
     redirect_in_to_client._stopped.wait()
+  logging.info(f"Closed UDP connection to {client_address}")

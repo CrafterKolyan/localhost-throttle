@@ -1,3 +1,4 @@
+import logging
 from .parser import create_parser
 from .protocol_type import Protocol
 from .redirect_tcp import redirect_tcp
@@ -15,6 +16,8 @@ def redirect(protocol, in_port, out_port, hostname="", request_queue_size=100, p
 def localhost_throttle(in_port, out_port, protocols):
   if len(protocols) > 1:
     raise NotImplementedError("Currently redirection of 2 protocols at the same time is not supported")
+
+  logging.basicConfig(level=logging.INFO)
   for protocol in protocols:
     redirect(protocol, in_port, out_port)
 
