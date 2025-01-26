@@ -1,3 +1,5 @@
+import contextlib
+import socket
 import subprocess
 import sys
 
@@ -24,3 +26,9 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols):
     cwd=DEFAULT_CWD,
     creationflags=creationflags,
   )
+
+
+def random_port(socket_type):
+  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as sock:
+    sock.bind(("localhost", 0))
+    return sock.getsockname()[1]

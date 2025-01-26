@@ -7,13 +7,7 @@ import pytest
 from localhost_throttle import Protocol, ProtocolSet
 
 from .constants import DELAY_TO_START_UP
-from .util import spawn_localhost_throttle
-
-
-def random_port():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-    sock.bind(("localhost", 0))
-    return sock.getsockname()[1]
+from .util import spawn_localhost_throttle, random_port
 
 
 @pytest.mark.timeout(5)
@@ -25,7 +19,7 @@ def test_redirects_data_in_to_out():
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
-      out_port = random_port()
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -49,7 +43,7 @@ def test_redirects_data_out_to_in():
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
-      out_port = random_port()
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -73,7 +67,7 @@ def test_redirects_data_in_to_out_to_in():
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
-      out_port = random_port()
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -102,7 +96,7 @@ def test_redirects_data_multiple_hops():
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
-      out_port = random_port()
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -130,7 +124,7 @@ def test_end_of_connection_from_server_is_propagated_after_n_messages(n):
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
-      out_port = random_port()
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -168,7 +162,7 @@ def test_end_of_connection_from_client_is_propagated_after_n_messages(n):
       in_socket.bind(("localhost", 0))
       in_socket.listen(1)
       in_port = in_socket.getsockname()[1]
-      out_port = random_port()
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:

@@ -7,20 +7,7 @@ import pytest
 from localhost_throttle import Protocol, ProtocolSet
 
 from .constants import DELAY_TO_START_UP
-from .util import spawn_localhost_throttle
-
-
-def random_ports(size=1):
-  try:
-    sockets = [socket.socket(socket.AF_INET, socket.SOCK_DGRAM) for _ in range(size)]
-    ports = []
-    for sock in sockets:
-      sock.bind(("localhost", 0))
-      ports.append(sock.getsockname()[1])
-    return ports
-  finally:
-    for sock in sockets:
-      sock.close()
+from .util import spawn_localhost_throttle, random_port
 
 
 @pytest.mark.timeout(3)
@@ -31,8 +18,7 @@ def test_redirects_data_out_to_in():
     with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_port = in_socket.getsockname()[1]
-      ports = random_ports(size=1)
-      out_port = ports[0]
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -53,8 +39,7 @@ def test_redirects_data_out_to_in_to_out():
     with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_port = in_socket.getsockname()[1]
-      ports = random_ports(size=1)
-      out_port = ports[0]
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -81,8 +66,7 @@ def test_redirects_data_client_receives_data_from_the_same_port():
     with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_port = in_socket.getsockname()[1]
-      ports = random_ports(size=1)
-      out_port = ports[0]
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
@@ -112,8 +96,7 @@ def test_redirects_data_multiple_hops():
     with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as out_socket:
       in_socket.bind(("localhost", 0))
       in_port = in_socket.getsockname()[1]
-      ports = random_ports(size=1)
-      out_port = ports[0]
+      out_port = random_port(socket_type)
 
       process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
       try:
