@@ -21,22 +21,36 @@ class TCPSingleConnectionTest:
     protocol = Protocol.TCP
     socket_type = protocol.socket_type()
     in_socket = socket.socket(socket.AF_INET, socket_type)
-    out_socket = socket.socket(socket.AF_INET, socket_type)
-    # TODO: Need to use `RunIfException` here in case the exception is thrown here
-    in_socket.bind(("localhost", 0))
-    in_socket.listen(1)
-    in_port = in_socket.getsockname()[1]
-    out_port = random_port(socket_type)
+    # TODO: Need to use `RunIfException` here to prettify code
+    try:
+      out_socket = socket.socket(socket.AF_INET, socket_type)
+      try:
+        in_socket.bind(("localhost", 0))
+        in_socket.listen(1)
+        in_port = in_socket.getsockname()[1]
+        out_port = random_port(socket_type)
 
-    self._in_socket = in_socket
-    self._out_socket = out_socket
-    self._process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
-    # TODO: Due to this `time.sleep` `RunIfException` becomes even more critical
-    time.sleep(DELAY_TO_START_UP)
+        self._in_socket = in_socket
+        self._out_socket = out_socket
+        self._process = spawn_localhost_throttle(
+          in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol])
+        )
+        try:
+          # TODO: Due to this `time.sleep` `RunIfException` becomes even more critical
+          time.sleep(DELAY_TO_START_UP)
 
-    out_socket.connect(("localhost", out_port))
-    in_socket_out, _ = in_socket.accept()
-    self._in_socket_out = in_socket_out
+          out_socket.connect(("localhost", out_port))
+          in_socket_out, _ = in_socket.accept()
+          try:
+            self._in_socket_out = in_socket_out
+          except BaseException:
+            in_socket_out.close()
+        except BaseException:
+          self._process.close()
+      except BaseException:
+        out_socket.close()
+    except BaseException:
+      in_socket.close()
     return (self._in_socket_out, self._out_socket, self._process)
 
   def __exit__(self, exc_type, exc_value, traceback):
