@@ -36,7 +36,7 @@ class TCPSingleConnectionTest:
           in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol])
         )
         try:
-          # TODO: Due to this `time.sleep` `RunIfException` becomes even more critical
+          # TODO: Due to this `time.sleep` correct handling of resources becomes even more critical. Really want to use `RunIfException`
           time.sleep(DELAY_TO_START_UP)
 
           out_socket.connect(("localhost", out_port))
