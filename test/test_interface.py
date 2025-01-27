@@ -1,7 +1,5 @@
-import contextlib
 import time
 import signal
-import socket
 import subprocess
 import sys
 
