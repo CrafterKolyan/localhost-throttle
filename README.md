@@ -26,7 +26,7 @@ pip install .
 ```
 
 ### Requirements
-- Python 3.7+
+- Python 3.10+
 - `setuptools>=42`
 - `pip>=19`
 - OS that supports threads

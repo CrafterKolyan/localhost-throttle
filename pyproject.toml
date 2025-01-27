@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "localhost-throttle"
 version = "0.0.1"
 description = "Tool to throttle or redirect your localhost connections"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 readme = "README.md"
 classifiers = [
   "Development Status :: 1 - Planning",
