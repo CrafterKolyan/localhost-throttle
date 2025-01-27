@@ -57,10 +57,11 @@ def redirect_and_close_on_exception_tcp(*, client_socket, client_address, in_por
       in_socket.connect(("localhost", in_port))
       redirect_in_to_client = RedirectClientTCP(in_socket, client_socket, resource_monitor=resource_monitor)
       redirect_in_to_client.start()
+      logging.info(f"Opened TCP connection to {client_address}")
       redirect_in_to_client._stopped.wait()
       in_socket.shutdown(socket.SHUT_RDWR)
     client_socket.shutdown(socket.SHUT_RDWR)
-  logging.info(f"Closed connection to {client_address}")
+  logging.info(f"Closed TCP connection to {client_address}")
 
 
 # TODO: Make hostname configurable

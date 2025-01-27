@@ -23,7 +23,7 @@ def redirect(protocol, in_port, out_port, *, resource_monitor, hostname="", requ
 
 
 def localhost_throttle(in_port, out_port, protocols):
-  logging.basicConfig(format="%(asctime)s\t%(filename)s:%(lineno)s\t%(levelname)s\t%(message)s", level=logging.DEBUG)
+  logging.basicConfig(format="%(asctime)s\t%(filename)s:%(lineno)s\t%(levelname)s\t%(message)s", level=logging.INFO)
   resource_monitor = ResourceMonitor()
   for protocol in protocols:
     resource_monitor.add_thread(f=redirect, args=(protocol, in_port, out_port), daemon=True)
