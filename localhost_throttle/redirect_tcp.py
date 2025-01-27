@@ -4,7 +4,7 @@ import socket
 import threading
 
 from .context_util import RunIfException, RunFinally
-from .resource_monitor import ResourceMonitor
+from .global_state import GlobalState
 
 
 class RedirectClientTCP:
@@ -19,7 +19,7 @@ class RedirectClientTCP:
     self._thread_in_to_out = None
     self._thread_out_to_in = None
 
-  def _start_redirect_blocking(self, in_socket, out_socket, *, resource_monitor: ResourceMonitor):
+  def _start_redirect_blocking(self, in_socket, out_socket, *, resource_monitor: GlobalState):
     buffer_size = self.buffer_size
     while not resource_monitor.is_shutdown() and not self._stopped.isSet():
       try:
@@ -49,7 +49,7 @@ class RedirectClientTCP:
     self._stopped.set()
 
 
-def redirect_and_close_on_exception_tcp(*, client_socket, client_address, in_port, resource_monitor: ResourceMonitor):
+def redirect_and_close_on_exception_tcp(*, client_socket, client_address, in_port, resource_monitor: GlobalState):
   with RunFinally(lambda: resource_monitor.close_socket(client_socket)):
     in_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     resource_monitor.add_socket(in_socket)
@@ -67,7 +67,7 @@ def redirect_and_close_on_exception_tcp(*, client_socket, client_address, in_por
 # TODO: Make hostname configurable
 # TODO: Make request_queue_size configurable
 # TODO: Make poll_interval configurable
-def redirect_tcp(in_port, out_port, *, resource_monitor: ResourceMonitor, hostname="", request_queue_size=100, poll_interval=0.1):
+def redirect_tcp(in_port, out_port, *, resource_monitor: GlobalState, hostname="", request_queue_size=100, poll_interval=0.1):
   out_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   with RunIfException(lambda: out_socket.close()):
     resource_monitor.add_socket(out_socket)

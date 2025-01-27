@@ -5,7 +5,7 @@ from concurrent.futures import Future
 from collections import defaultdict
 
 
-class ResourceMonitor:
+class GlobalState:
   def __init__(self):
     current_thread = threading.current_thread()
     self.total_threads_spawned = 0

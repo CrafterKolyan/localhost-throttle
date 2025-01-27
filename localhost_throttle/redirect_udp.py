@@ -5,7 +5,7 @@ import socketserver
 import threading
 
 from .context_util import RunIfException, RunFinally
-from .resource_monitor import ResourceMonitor
+from .global_state import GlobalState
 
 
 def start_redirect_blocking(out_addr, in_socket, out_socket, *, resource_monitor, buffer_size=65536, poll_interval=0.1):
@@ -56,7 +56,7 @@ def create_udp_server_request_handler_with_payload(*, in_port, client_address_to
   return UDPServerRequestHandler
 
 
-def redirect_udp(in_port, out_port, *, resource_monitor: ResourceMonitor, hostname="", poll_interval=0.1):
+def redirect_udp(in_port, out_port, *, resource_monitor: GlobalState, hostname="", poll_interval=0.1):
   client_address_to_socket_and_thread = dict()
 
   out_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

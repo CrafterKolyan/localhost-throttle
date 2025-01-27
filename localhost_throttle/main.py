@@ -4,7 +4,7 @@ from .parser import create_parser
 from .protocol_type import Protocol
 from .redirect_tcp import redirect_tcp
 from .redirect_udp import redirect_udp
-from .resource_monitor import ResourceMonitor
+from .global_state import GlobalState
 
 
 def redirect(protocol, in_port, out_port, *, resource_monitor, hostname="", request_queue_size=100, poll_interval=0.1):
@@ -24,7 +24,7 @@ def redirect(protocol, in_port, out_port, *, resource_monitor, hostname="", requ
 
 def localhost_throttle(in_port, out_port, protocols):
   logging.basicConfig(format="%(asctime)s\t%(filename)s:%(lineno)s\t%(levelname)s\t%(message)s", level=logging.INFO)
-  resource_monitor = ResourceMonitor()
+  resource_monitor = GlobalState()
   for protocol in protocols:
     resource_monitor.add_thread(f=redirect, args=(protocol, in_port, out_port))
   try:
