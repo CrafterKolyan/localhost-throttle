@@ -8,6 +8,31 @@ version = "0.0.1"
 description = "Tool to throttle or redirect your localhost connections"
 requires-python = ">=3.7"
 readme = "README.md"
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Operating System :: Unix",
+  "Environment :: Console",
+  "Natural Language :: English",
+  "Topic :: Internet",
+  "Topic :: Internet :: Proxy Servers",
+  "Topic :: Software Development",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: System",
+  "Topic :: System :: Networking"
+]
 
 [project.scripts]
 localhost-throttle = "localhost_throttle.main:main"
