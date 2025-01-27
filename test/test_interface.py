@@ -41,7 +41,7 @@ def test_properly_starts_up():
 
 
 @pytest.mark.timeout(3)
-@pytest.mark.skipif(sys.platform != "win32", reason="signal.CTRL_BREAK_EVENT exists only on Windows")
+@pytest.mark.skipif(sys.platform != "win32", reason="Exits after Ctrl+Break on Windows")
 def test_can_be_killed_with_CTRL_BREAK_on_windows():
   protocol = Protocol.TCP
   socket_type = protocol.socket_type()
@@ -51,6 +51,22 @@ def test_can_be_killed_with_CTRL_BREAK_on_windows():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.CTRL_BREAK_EVENT)
+    process.communicate(timeout=0.3)
+  finally:
+    process.kill()
+
+
+@pytest.mark.timeout(3)
+@pytest.mark.skipif(sys.platform == "win32", reason="Exits after Ctrl+C on Linux")
+def test_can_be_killed_with_SIGINT_on_linux():
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  in_port, out_port = random_ports(socket_type, size=2)
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
+  try:
+    # Give some time to start up
+    time.sleep(DELAY_TO_START_UP)
+    process.send_signal(signal.SIGINT)
     process.communicate(timeout=0.3)
   finally:
     process.kill()
