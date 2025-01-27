@@ -84,12 +84,16 @@ def test_redirects_data_in_to_out_to_in():
     data_to_send = b"1"
     in_socket_out.send(data_to_send)
     data_to_receive = out_socket.recv(len(data_to_send))
-    assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+    assert data_to_send == data_to_receive, (
+      f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+    )
 
     data_to_send = b"2"
     out_socket.send(data_to_send)
     data_to_receive = in_socket_out.recv(len(data_to_send))
-    assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+    assert data_to_send == data_to_receive, (
+      f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+    )
 
 
 @pytest.mark.timeout(3)
@@ -99,7 +103,9 @@ def test_redirects_data_multiple_hops():
     for data_to_send in messages:
       in_socket_out.send(data_to_send)
       data_to_receive = out_socket.recv(len(data_to_send))
-      assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+      assert data_to_send == data_to_receive, (
+        f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+      )
       in_socket_out, out_socket = out_socket, in_socket_out
 
 
@@ -112,17 +118,21 @@ def test_end_of_connection_from_server_is_propagated_after_n_messages(n):
       data_to_send = messages[2 * i]
       in_socket_out.send(data_to_send)
       data_to_receive = out_socket.recv(len(data_to_send))
-      assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+      assert data_to_send == data_to_receive, (
+        f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+      )
 
       data_to_send = messages[2 * i + 1]
       out_socket.send(data_to_send)
       data_to_receive = in_socket_out.recv(len(data_to_send))
-      assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+      assert data_to_send == data_to_receive, (
+        f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+      )
 
     in_socket_out.shutdown(socket.SHUT_RDWR)
     data_to_receive = out_socket.recv(1)
     expected = b""
-    assert data_to_receive == expected, f"Data received is not equal to data send. ({expected=}, {data_to_receive=})"
+    assert data_to_receive == expected, f"Shutdown was expected. (expected: {expected}, got: {data_to_receive})"
 
 
 @pytest.mark.timeout(3)
@@ -134,15 +144,19 @@ def test_end_of_connection_from_client_is_propagated_after_n_messages(n):
       data_to_send = messages[2 * i]
       in_socket_out.send(data_to_send)
       data_to_receive = out_socket.recv(len(data_to_send))
-      assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+      assert data_to_send == data_to_receive, (
+        f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+      )
 
       if i + 1 != n:
         data_to_send = messages[2 * i + 1]
         out_socket.send(data_to_send)
         data_to_receive = in_socket_out.recv(len(data_to_send))
-        assert data_to_send == data_to_receive, f"Data received is not equal to data send. ({data_to_send=}, {data_to_receive=})"
+        assert data_to_send == data_to_receive, (
+          f"Data received is not equal to data send. (sent: {data_to_send}, got: {data_to_receive})"
+        )
 
     out_socket.shutdown(socket.SHUT_RDWR)
     data_to_receive = in_socket_out.recv(1)
     expected = b""
-    assert data_to_receive == expected, f"Data received is not equal to data send. ({expected=}, {data_to_receive=})"
+    assert data_to_receive == expected, f"Shutdown was expected. (expected: {expected}, got: {data_to_receive})"
