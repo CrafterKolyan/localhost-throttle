@@ -26,8 +26,6 @@ class RedirectClientUDP:
         if len(data) == 0:
           self._stopped.set()
           break
-
-        # in_addr, out_addr = out_addr, in_addr
       except OSError:
         self._stopped.set()
 
