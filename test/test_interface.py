@@ -23,7 +23,7 @@ def test_fails_with_no_arguments():
   )
   process.communicate()
   return_code = process.returncode
-  assert return_code != 0, "Return code should not be 0 when run without arguments"
+  assert return_code != 0, "localhost-throttle should fail when run without arguments"
 
 
 @pytest.mark.timeout(3)
