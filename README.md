@@ -1,4 +1,5 @@
-[![Tests](https://github.com/CrafterKolyan/tiny-python-docker-image/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/CrafterKolyan/tiny-python-docker-image/actions/workflows/tests.yml)
+[![Tests](https://github.com/CrafterKolyan/localhost-throttle/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/CrafterKolyan/localhost-throttle
+/actions/workflows/tests.yml)
 
 # localhost-throttle
 Tool to throttle or redirect your localhost connections
