@@ -18,6 +18,7 @@ def start_redirect_blocking(out_addr, in_socket, out_socket, *, resource_monitor
 
 
 def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, resource_monitor):
+  logging.info(f"Opened UDP connection to {client_address}")
   start_redirect_blocking(client_address, in_socket, out_socket, resource_monitor=resource_monitor)
   logging.info(f"Closed UDP connection to {client_address}")
 
