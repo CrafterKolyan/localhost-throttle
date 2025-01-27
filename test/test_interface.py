@@ -10,7 +10,7 @@ import pytest
 from localhost_throttle import Protocol, ProtocolSet
 
 from .constants import DEFAULT_CWD, MODULE_NAME, DELAY_TO_START_UP
-from .util import spawn_localhost_throttle
+from .util import spawn_localhost_throttle, random_ports
 
 
 def test_fails_with_no_arguments():
@@ -28,13 +28,10 @@ def test_fails_with_no_arguments():
 
 @pytest.mark.timeout(3)
 def test_properly_starts_up():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
-      in_socket.bind(("localhost", 0))
-      in_port = in_socket.getsockname()[1]
-      out_socket.bind(("localhost", 0))
-      out_port = out_socket.getsockname()[1]
-  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  in_port, out_port = random_ports(socket_type, size=2)
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
   try:
     time.sleep(DELAY_TO_START_UP)
     with pytest.raises(subprocess.TimeoutExpired):
@@ -46,13 +43,10 @@ def test_properly_starts_up():
 @pytest.mark.timeout(3)
 @pytest.mark.skipif(sys.platform != "win32", reason="signal.CTRL_BREAK_EVENT exists only on Windows")
 def test_can_be_killed_with_CTRL_BREAK_on_windows():
-  with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as in_socket:
-    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as out_socket:
-      in_socket.bind(("localhost", 0))
-      in_port = in_socket.getsockname()[1]
-      out_socket.bind(("localhost", 0))
-      out_port = out_socket.getsockname()[1]
-  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([Protocol.TCP]))
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  in_port, out_port = random_ports(socket_type, size=2)
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
   try:
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)

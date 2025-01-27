@@ -28,7 +28,18 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols):
   )
 
 
-def random_port(socket_type):
-  with contextlib.closing(socket.socket(socket.AF_INET, socket_type)) as sock:
-    sock.bind(("localhost", 0))
-    return sock.getsockname()[1]
+def random_ports(socket_type, size=None):
+  sockets = [socket.socket(socket.AF_INET, socket_type) for _ in range(size if size is not None else 1)]
+  try:
+    ports = [0 for _ in range(len(sockets))]
+    for i, sock in enumerate(sockets):
+      sock.bind(("localhost", 0))
+      ports[i] = sock.getsockname()[1]
+
+    if size is None:
+      return ports[0]
+    return ports
+
+  finally:
+    for sock in sockets:
+      sock.close()

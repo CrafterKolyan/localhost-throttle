@@ -7,7 +7,7 @@ import pytest
 from localhost_throttle import Protocol, ProtocolSet
 
 from .constants import DELAY_TO_START_UP
-from .util import spawn_localhost_throttle, random_port
+from .util import spawn_localhost_throttle, random_ports
 
 
 class TCPSingleConnectionTest:
@@ -28,7 +28,7 @@ class TCPSingleConnectionTest:
         in_socket.bind(("localhost", 0))
         in_socket.listen(1)
         in_port = in_socket.getsockname()[1]
-        out_port = random_port(socket_type)
+        out_port = random_ports(socket_type)
 
         self._in_socket = in_socket
         self._out_socket = out_socket
