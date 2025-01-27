@@ -1,63 +1,8 @@
-import contextlib
 import socket
-import time
 
 import pytest
 
-from localhost_throttle import Protocol, ProtocolSet
-
-from .constants import DELAY_TO_START_UP
-from .util import spawn_localhost_throttle, random_ports
-
-
-class TCPSingleConnectionTest:
-  def __init__(self):
-    self._in_socket = None
-    self._out_socket = None
-    self._in_socket_out = None
-    self._process = None
-
-  def __enter__(self):
-    protocol = Protocol.TCP
-    socket_type = protocol.socket_type()
-    in_socket = socket.socket(socket.AF_INET, socket_type)
-    # TODO: Need to use `RunIfException` here to prettify code
-    try:
-      out_socket = socket.socket(socket.AF_INET, socket_type)
-      try:
-        in_socket.bind(("localhost", 0))
-        in_socket.listen(1)
-        in_port = in_socket.getsockname()[1]
-        out_port = random_ports(socket_type)
-
-        self._in_socket = in_socket
-        self._out_socket = out_socket
-        self._process = spawn_localhost_throttle(
-          in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol])
-        )
-        try:
-          # TODO: Due to this `time.sleep` correct handling of resources becomes even more critical. Really want to use `RunIfException`
-          time.sleep(DELAY_TO_START_UP)
-
-          out_socket.connect(("localhost", out_port))
-          in_socket_out, _ = in_socket.accept()
-          try:
-            self._in_socket_out = in_socket_out
-          except BaseException:
-            in_socket_out.close()
-        except BaseException:
-          self._process.close()
-      except BaseException:
-        out_socket.close()
-    except BaseException:
-      in_socket.close()
-    return (self._in_socket_out, self._out_socket, self._process)
-
-  def __exit__(self, exc_type, exc_value, traceback):
-    with contextlib.closing(self._in_socket):
-      with contextlib.closing(self._out_socket):
-        with contextlib.closing(self._in_socket_out):
-          self._process.kill()
+from .util import TCPSingleConnectionTest
 
 
 @pytest.mark.timeout(5)

@@ -1,24 +1,31 @@
+import contextlib
 import socket
 import subprocess
 import sys
+import time
 
-from .constants import DEFAULT_CWD, MODULE_NAME
+from localhost_throttle import Protocol, ProtocolSet
+
+from .constants import DEFAULT_CWD, MODULE_NAME, DELAY_TO_START_UP
 
 
-def spawn_localhost_throttle(*, in_port, out_port, protocols):
+def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
   creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+  args = [
+    sys.executable,
+    "-m",
+    MODULE_NAME,
+    "--in-port",
+    str(in_port),
+    "--out-port",
+    str(out_port),
+    "--protocols",
+    str(protocols),
+  ]
+  if bandwidth is not None:
+    args.extend(["--bandwidth", str(bandwidth)])
   return subprocess.Popen(
-    [
-      sys.executable,
-      "-m",
-      MODULE_NAME,
-      "--in-port",
-      str(in_port),
-      "--out-port",
-      str(out_port),
-      "--protocols",
-      str(protocols),
-    ],
+    args,
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
@@ -42,3 +49,54 @@ def random_ports(socket_type, size=None):
   finally:
     for sock in sockets:
       sock.close()
+
+
+class TCPSingleConnectionTest:
+  def __init__(self, bandwidth=None):
+    self._in_socket = None
+    self._out_socket = None
+    self._in_socket_out = None
+    self._process = None
+    self.bandwidth = bandwidth
+
+  def __enter__(self):
+    protocol = Protocol.TCP
+    socket_type = protocol.socket_type()
+    in_socket = socket.socket(socket.AF_INET, socket_type)
+    # TODO: Need to use `RunIfException` here to prettify code
+    try:
+      out_socket = socket.socket(socket.AF_INET, socket_type)
+      try:
+        in_socket.bind(("localhost", 0))
+        in_socket.listen(1)
+        in_port = in_socket.getsockname()[1]
+        out_port = random_ports(socket_type)
+
+        self._in_socket = in_socket
+        self._out_socket = out_socket
+        self._process = spawn_localhost_throttle(
+          in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), bandwidth=self.bandwidth
+        )
+        try:
+          # TODO: Due to this `time.sleep` correct handling of resources becomes even more critical. Really want to use `RunIfException`
+          time.sleep(DELAY_TO_START_UP)
+
+          out_socket.connect(("localhost", out_port))
+          in_socket_out, _ = in_socket.accept()
+          try:
+            self._in_socket_out = in_socket_out
+          except BaseException:
+            in_socket_out.close()
+        except BaseException:
+          self._process.close()
+      except BaseException:
+        out_socket.close()
+    except BaseException:
+      in_socket.close()
+    return (self._in_socket_out, self._out_socket, self._process)
+
+  def __exit__(self, exc_type, exc_value, traceback):
+    with contextlib.closing(self._in_socket):
+      with contextlib.closing(self._out_socket):
+        with contextlib.closing(self._in_socket_out):
+          self._process.kill()

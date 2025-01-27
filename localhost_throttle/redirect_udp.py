@@ -56,7 +56,11 @@ def create_udp_server_request_handler_with_payload(*, in_port, client_address_to
   return UDPServerRequestHandler
 
 
-def redirect_udp(in_port, out_port, *, global_state: GlobalState, hostname="", poll_interval=0.1):
+def redirect_udp(
+  in_port: int, out_port: int, *, bandwidth: float | None, global_state: GlobalState, hostname: str = "", poll_interval: float = 0.1
+):
+  if bandwidth is not None:
+    raise NotImplementedError("Bandwidth limitting is not supported for UDP traffic at the moment")
   client_address_to_socket_and_thread = dict()
 
   out_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

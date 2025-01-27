@@ -12,4 +12,7 @@ def create_parser():
     required=True,
     help="protocols to redirect. Supported values: 'tcp', 'udp', 'tcp,udp'",
   )
+  parser.add_argument(
+    "--bandwidth", type=float, required=False, help="Bandwidth in bytes per second. Can be ommitted for unlimited"
+  )
   return parser
