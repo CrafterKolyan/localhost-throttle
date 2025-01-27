@@ -42,7 +42,6 @@ def create_udp_server_request_handler_with_payload(*, in_port, client_address_to
             "out_socket": out_socket,
             "socket_obj": socket_obj,
           },
-          daemon=True,
         )
         client_address_to_thread[client_address] = (thread, socket_obj)
         thread.start()
@@ -86,7 +85,6 @@ def redirect_udp(in_port, out_port, *, resource_monitor: ResourceMonitor, hostna
               "out_socket": out_socket,
               "in_socket": server_client_socket,
             },
-            daemon=True,
           )
           client_address_to_socket_and_thread[client_address] = (server_client_socket, thread)
       else:

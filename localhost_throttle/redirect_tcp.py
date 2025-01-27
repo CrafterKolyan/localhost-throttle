@@ -39,10 +39,10 @@ class RedirectClientTCP:
   def start(self):
     self._stopped = threading.Event()
     self._thread_in_to_out = self.resource_monitor.add_thread(
-      f=self._start_redirect_blocking, args=(self.in_socket, self.out_socket), daemon=True
+      f=self._start_redirect_blocking, args=(self.in_socket, self.out_socket)
     )
     self._thread_out_to_in = self.resource_monitor.add_thread(
-      f=self._start_redirect_blocking, args=(self.out_socket, self.in_socket), daemon=True
+      f=self._start_redirect_blocking, args=(self.out_socket, self.in_socket)
     )
 
   def stop(self):
@@ -86,7 +86,6 @@ def redirect_tcp(in_port, out_port, *, resource_monitor: ResourceMonitor, hostna
         resource_monitor.add_thread(
           f=redirect_and_close_on_exception_tcp,
           kwargs={"client_socket": client_socket, "client_address": client_address, "in_port": in_port},
-          daemon=True,
         )
 
     out_socket.shutdown(socket.SHUT_RDWR)
