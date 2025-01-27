@@ -47,7 +47,7 @@ class GlobalState:
     with self:
       thread_id = self.total_threads_spawned
       self.total_threads_spawned += 1
-      extra_kwargs = {"resource_monitor": self}
+      extra_kwargs = {"global_state": self}
       kwargs = kwargs if kwargs is not None else dict()
       for key in extra_kwargs:
         if key in kwargs:

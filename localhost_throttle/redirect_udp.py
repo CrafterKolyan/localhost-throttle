@@ -8,8 +8,8 @@ from .context_util import RunIfException, RunFinally
 from .global_state import GlobalState
 
 
-def start_redirect_blocking(out_addr, in_socket, out_socket, *, resource_monitor, buffer_size=65536, poll_interval=0.1):
-  while not resource_monitor.is_shutdown():
+def start_redirect_blocking(out_addr, in_socket, out_socket, *, global_state, buffer_size=65536, poll_interval=0.1):
+  while not global_state.is_shutdown():
     new_data, _, _ = select.select([in_socket], [], [], poll_interval)
     if not new_data:
       continue
@@ -17,9 +17,9 @@ def start_redirect_blocking(out_addr, in_socket, out_socket, *, resource_monitor
     out_socket.sendto(data, out_addr)
 
 
-def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, resource_monitor):
+def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, global_state):
   logging.info(f"Opened UDP connection to {client_address}")
-  start_redirect_blocking(client_address, in_socket, out_socket, resource_monitor=resource_monitor)
+  start_redirect_blocking(client_address, in_socket, out_socket, global_state=global_state)
   logging.info(f"Closed UDP connection to {client_address}")
 
 
@@ -56,17 +56,17 @@ def create_udp_server_request_handler_with_payload(*, in_port, client_address_to
   return UDPServerRequestHandler
 
 
-def redirect_udp(in_port, out_port, *, resource_monitor: GlobalState, hostname="", poll_interval=0.1):
+def redirect_udp(in_port, out_port, *, global_state: GlobalState, hostname="", poll_interval=0.1):
   client_address_to_socket_and_thread = dict()
 
   out_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
   with RunIfException(lambda: out_socket.close()):
-    resource_monitor.add_socket(out_socket)
-  with RunFinally(lambda: resource_monitor.close_socket(out_socket)):
+    global_state.add_socket(out_socket)
+  with RunFinally(lambda: global_state.close_socket(out_socket)):
     out_socket.bind((hostname, out_port))
     buffer_size = 65537
 
-    while not resource_monitor.is_shutdown():
+    while not global_state.is_shutdown():
       new_connections, _, _ = select.select([out_socket], [], [], poll_interval)
       if not new_connections:
         continue
@@ -75,10 +75,10 @@ def redirect_udp(in_port, out_port, *, resource_monitor: GlobalState, hostname="
       if socket_and_thread is None:
         server_client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         with RunIfException(lambda: server_client_socket.close()):
-          resource_monitor.add_socket(server_client_socket)
-        with RunIfException(lambda: resource_monitor.close_socket(server_client_socket)):
+          global_state.add_socket(server_client_socket)
+        with RunIfException(lambda: global_state.close_socket(server_client_socket)):
           server_client_socket.bind(("localhost", 0))
-          thread = resource_monitor.add_thread(
+          thread = global_state.add_thread(
             f=redirect_and_close_on_exception_udp,
             kwargs={
               "client_address": client_address,
@@ -94,4 +94,4 @@ def redirect_udp(in_port, out_port, *, resource_monitor: GlobalState, hostname="
     out_socket.shutdown(socket.SHUT_RDWR)
     for sock, _ in client_address_to_socket_and_thread.items():
       sock.shutdown(socket.SHUT_RDWR)
-      resource_monitor.close_socket(sock)
+      global_state.close_socket(sock)
