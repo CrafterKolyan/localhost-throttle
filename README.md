@@ -19,7 +19,7 @@ localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp --bandwidth 10
 
 ## Current features
 - Redirection of TCP/UDP traffic from one port to another
-- Basic TCP/UDP traffic bandwidth limitting (very dumb) (will be improved in the future)
+- Basic TCP/UDP traffic bandwidth limitting (will be improved in the future)
 
 ## Installing package
 ```
