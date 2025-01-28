@@ -1,66 +1,33 @@
 import logging
 import select
 import socket
-import socketserver
-import threading
+import time
 
 from .context_util import RunIfException, RunFinally
 from .global_state import GlobalState
 
 
-def start_redirect_blocking(out_addr, in_socket, out_socket, *, global_state, buffer_size=65536, poll_interval=0.1):
+def start_redirect_blocking(out_addr, in_socket, out_socket, *, bandwidth, global_state, buffer_size=65536, poll_interval=0.1):
   while not global_state.is_shutdown():
     new_data, _, _ = select.select([in_socket], [], [], poll_interval)
     if not new_data:
       continue
     data, _ = in_socket.recvfrom(buffer_size)
+    if bandwidth is not None:
+      time_to_sleep = len(data) / bandwidth
+      time.sleep(time_to_sleep)
     out_socket.sendto(data, out_addr)
 
 
-def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, global_state):
+def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, bandwidth, global_state):
   logging.info(f"Opened UDP connection to {client_address}")
-  start_redirect_blocking(client_address, in_socket, out_socket, global_state=global_state)
+  start_redirect_blocking(client_address, in_socket, out_socket, bandwidth=bandwidth, global_state=global_state)
   logging.info(f"Closed UDP connection to {client_address}")
-
-
-def create_udp_server_request_handler_with_payload(*, in_port, client_address_to_thread):
-  class UDPServerRequestHandler(socketserver.DatagramRequestHandler):
-    def handle(self):
-      message, out_socket = self.request
-      client_address = self.client_address
-      result = client_address_to_thread.get(client_address, None)
-      if result is None:
-        logging.info(f"Received new UDP connection from {client_address}")
-        # TODO: Rewrite `socket_obj` to a class that you can set only once
-        socket_obj = []
-        thread = threading.Thread(
-          target=redirect_and_close_on_exception_udp,
-          kwargs={
-            "in_port": in_port,
-            "client_address": client_address,
-            "first_message": message,
-            "out_socket": out_socket,
-            "socket_obj": socket_obj,
-          },
-        )
-        client_address_to_thread[client_address] = (thread, socket_obj)
-        thread.start()
-      else:
-        _, socket_obj = result
-        in_socket = socket_obj[0]
-        in_socket.sendto(message, ("localhost", in_port))
-
-    def finish(self):
-      pass
-
-  return UDPServerRequestHandler
 
 
 def redirect_udp(
   in_port: int, out_port: int, *, bandwidth: float | None, global_state: GlobalState, hostname: str = "", poll_interval: float = 0.1
 ):
-  if bandwidth is not None:
-    raise NotImplementedError("Bandwidth limitting is not supported for UDP traffic at the moment")
   client_address_to_socket_and_thread = dict()
 
   out_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -88,11 +55,16 @@ def redirect_udp(
               "client_address": client_address,
               "out_socket": out_socket,
               "in_socket": server_client_socket,
+              "bandwidth": bandwidth,
             },
           )
           client_address_to_socket_and_thread[client_address] = (server_client_socket, thread)
       else:
         server_client_socket, _ = socket_and_thread
+
+      if bandwidth is not None:
+        time_to_sleep = len(message) / bandwidth
+        time.sleep(time_to_sleep)
       server_client_socket.sendto(message, ("localhost", in_port))
 
     out_socket.shutdown(socket.SHUT_RDWR)

@@ -100,3 +100,44 @@ class TCPSingleConnectionTest:
       with contextlib.closing(self._out_socket):
         with contextlib.closing(self._in_socket_out):
           self._process.kill()
+
+
+class UDPSingleConnectionTest:
+  def __init__(self, bandwidth=None):
+    self._in_socket = None
+    self._out_socket = None
+    self._process = None
+    self._out_port = None
+    self.bandwidth = bandwidth
+
+  def __enter__(self):
+    protocol = Protocol.UDP
+    socket_type = protocol.socket_type()
+    in_socket = socket.socket(socket.AF_INET, socket_type)
+    try:
+      # TODO: Need to use `RunIfException` here in case the exception is thrown here
+      in_socket.bind(("localhost", 0))
+      in_port = in_socket.getsockname()[1]
+      out_port = random_ports(socket_type)
+      self._in_socket = in_socket
+      self._out_socket = socket.socket(socket.AF_INET, socket_type)
+      try:
+        self._process = spawn_localhost_throttle(
+          in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), bandwidth=self.bandwidth
+        )
+        try:
+          self._out_port = out_port
+          # TODO: Due to this `time.sleep` `RunIfException` becomes even more critical
+          time.sleep(DELAY_TO_START_UP)
+        except BaseException:
+          self._process.kill()
+      except BaseException:
+        self._out_socket.close()
+    except BaseException:
+      in_socket.close()
+    return (self._in_socket, self._out_socket, self._process, self._out_port)
+
+  def __exit__(self, exc_type, exc_value, traceback):
+    with contextlib.closing(self._in_socket):
+      with contextlib.closing(self._out_socket):
+        self._process.kill()
