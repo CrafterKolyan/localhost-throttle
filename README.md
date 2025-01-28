@@ -5,7 +5,7 @@ Tool to throttle or redirect your localhost connections
 
 ## Usage
 ```
-localhost-throttle --in-port <in-port> --out-port <out-port> --protocols tcp
+localhost-throttle --in-port <in-port> --out-port <out-port> --protocols tcp,udp --bandwidth <bandwidth>
 ```
 
 You should think about `localhost-throttle` as a wrapper around your server.<br>
@@ -14,11 +14,12 @@ You should think about `localhost-throttle` as a wrapper around your server.<br>
 
 ## Example:
 ```
-localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp
+localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp --bandwidth 100000
 ```
 
 ## Current features
 - Redirection of TCP/UDP traffic from one port to another
+- Basic TCP/UDP traffic bandwidth limitting (very dumb) (will be improved in the future)
 
 ## Installing package
 ```
