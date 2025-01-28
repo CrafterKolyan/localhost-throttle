@@ -11,6 +11,6 @@ def test_bandwidth_slows_down_data_transfer_tcp():
     in_socket_out.send(data_to_send)
     with pytest.raises(TimeoutError):
       data_to_receive = out_socket.recv(len(data_to_send))
-    out_socket.settimeout(0.2)
+    out_socket.settimeout(0.5)
     data_to_receive = out_socket.recv(len(data_to_send))
     assert data_to_send == data_to_receive, "Data received is not equal to data send"

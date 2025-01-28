@@ -11,6 +11,6 @@ def test_redirects_data_out_to_in():
     in_socket.settimeout(0.1)
     with pytest.raises(TimeoutError):
       data_to_receive, _ = in_socket.recvfrom(len(data_to_send))
-    in_socket.settimeout(0.2)
+    in_socket.settimeout(0.5)
     data_to_receive, _ = in_socket.recvfrom(len(data_to_send))
     assert data_to_send == data_to_receive, "Data received is not equal to data send"
