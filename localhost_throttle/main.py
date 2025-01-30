@@ -56,4 +56,4 @@ def localhost_throttle(
 def main():
   parser = create_parser()
   args = parser.parse_args()
-  localhost_throttle(args.in_port, args.out_port, args.protocols, bandwidth=args.bandwidth)
+  localhost_throttle(args.server_port, args.new_server_port, args.protocols, bandwidth=args.bandwidth)

@@ -5,16 +5,16 @@ Tool to throttle or redirect your localhost connections
 
 ## Usage
 ```
-localhost-throttle --in-port <in-port> --out-port <out-port> --protocols tcp,udp --bandwidth <bandwidth>
+localhost-throttle --server-port <server-port> --new-server-port <new-server-port> --protocols tcp,udp --bandwidth <bandwidth>
 ```
 
 You should think about `localhost-throttle` as a wrapper around your server.<br>
-`in-port` means the port on which the server listens.<br>
-`out-port` means the port on which `localhost-throttle` will listen and to which client should subscribe.
+`server-port` means the original port on which the server listens.<br>
+`new-server-port` means the port on which `localhost-throttle` will listen and to which client should subscribe.
 
 ## Example:
 ```
-localhost-throttle --in-port 8000 --out-port 8001 --protocols tcp --bandwidth 100000
+localhost-throttle --server-port 8000 --new-server-port 8001 --protocols tcp --bandwidth 100000
 ```
 
 ## Current features

@@ -4,8 +4,18 @@ from .protocol_type import ProtocolSet
 
 def create_parser():
   parser = argparse.ArgumentParser(description="Throttle localhost connection")
-  parser.add_argument("--in-port", type=int, required=True, help="port on a localhost from which localhost-throttle receives data")
-  parser.add_argument("--out-port", type=int, required=True, help="port on a localhost to which localhost-throttle outputs data")
+  parser.add_argument(
+    "--server-port",
+    type=int,
+    required=True,
+    help="port on a localhost on which the original server is located. `localhost-throttle` subscribes to it",
+  )
+  parser.add_argument(
+    "--new-server-port",
+    type=int,
+    required=True,
+    help="port on a localhost for the new server that is handled by `localhost-throttle`. Clients should connect to this port.",
+  )
   parser.add_argument(
     "--protocols",
     type=ProtocolSet.from_string,
