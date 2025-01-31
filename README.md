@@ -1,16 +1,16 @@
 [![Tests](https://github.com/CrafterKolyan/localhost-throttle/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/CrafterKolyan/localhost-throttle/actions/workflows/tests.yml)
 
 # localhost-throttle
-Tool to throttle or redirect your localhost connections
+Tool to throttle or redirect your network connections
 
 ## Usage
 ```
-localhost-throttle --server-port <server-port> --new-server-port <new-server-port> --protocols tcp,udp --bandwidth <bandwidth>
+localhost-throttle --server <server-address> --new-server <new-server-address> --protocols tcp,udp --bandwidth <bandwidth>
 ```
 
 You should think about `localhost-throttle` as a wrapper around your server.<br>
-`server-port` means the original port on which the server listens.<br>
-`new-server-port` means the port on which `localhost-throttle` will listen and to which client should subscribe.
+`server-address` means the original address on which the original server listens. Example: `localhost:8000`<br>
+`new-server-address` means the address to which `localhost-throttle` server will be binded. Example: `0.0.0.0:8001`<br>
 
 ## Example:
 ```

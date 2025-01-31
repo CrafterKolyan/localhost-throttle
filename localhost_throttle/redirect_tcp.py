@@ -6,6 +6,7 @@ import threading
 
 from .context_util import RunIfException, RunFinally
 from .global_state import GlobalState
+from .hostname_and_port import HostnameAndPort
 
 
 class RedirectClientTCP:
@@ -64,13 +65,13 @@ class RedirectClientTCP:
 
 
 def redirect_and_close_on_exception_tcp(
-  *, client_socket, client_address, in_port: int, bandwidth: float | None, global_state: GlobalState
+  *, client_socket, client_address, server_address: HostnameAndPort, bandwidth: float | None, global_state: GlobalState
 ):
   with RunFinally(lambda: global_state.close_socket(client_socket)):
     in_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     global_state.add_socket(in_socket)
     with RunFinally(lambda: global_state.close_socket(in_socket)):
-      in_socket.connect(("localhost", in_port))
+      in_socket.connect(server_address.to_address())
       redirect_in_to_client = RedirectClientTCP(in_socket, client_socket, bandwidth=bandwidth, global_state=global_state)
       redirect_in_to_client.start()
       logging.info(f"Opened TCP connection to {client_address}")
@@ -80,16 +81,14 @@ def redirect_and_close_on_exception_tcp(
   logging.info(f"Closed TCP connection to {client_address}")
 
 
-# TODO: Make hostname configurable
 # TODO: Make request_queue_size configurable
 # TODO: Make poll_interval configurable
 def redirect_tcp(
-  in_port: int,
-  out_port: int,
+  server_address: HostnameAndPort,
+  new_server_address: HostnameAndPort,
   *,
   bandwidth: float | None,
   global_state: GlobalState,
-  hostname: str = "",
   request_queue_size: int = 100,
   poll_interval: float = 0.1,
 ):
@@ -97,7 +96,7 @@ def redirect_tcp(
   with RunIfException(lambda: out_socket.close()):
     global_state.add_socket(out_socket)
   with RunFinally(lambda: global_state.close_socket(out_socket)):
-    out_socket.bind((hostname, out_port))
+    out_socket.bind(new_server_address.to_address())
     out_socket.listen(request_queue_size)
 
     while not global_state.is_shutdown():
@@ -110,7 +109,12 @@ def redirect_tcp(
       with RunIfException(lambda: global_state.close_socket(client_socket)):
         global_state.add_thread(
           f=redirect_and_close_on_exception_tcp,
-          kwargs={"client_socket": client_socket, "client_address": client_address, "in_port": in_port, "bandwidth": bandwidth},
+          kwargs={
+            "client_socket": client_socket,
+            "client_address": client_address,
+            "server_address": server_address,
+            "bandwidth": bandwidth,
+          },
         )
 
     out_socket.shutdown(socket.SHUT_RDWR)

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "localhost-throttle"
-version = "0.0.2"
-description = "Tool to throttle or redirect your localhost connections"
+version = "0.0.3"
+description = "Tool to throttle or redirect your network connections"
 requires-python = ">=3.10"
 readme = "README.md"
 classifiers = [

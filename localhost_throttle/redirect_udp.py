@@ -5,9 +5,10 @@ import time
 
 from .context_util import RunIfException, RunFinally
 from .global_state import GlobalState
+from .hostname_and_port import HostnameAndPort
 
 
-def start_redirect_blocking(out_addr, in_socket, out_socket, *, bandwidth, global_state, buffer_size=65536, poll_interval=0.1):
+def start_redirect_blocking(out_address, in_socket, out_socket, *, bandwidth, global_state, buffer_size=65536, poll_interval=0.1):
   while not global_state.is_shutdown():
     new_data, _, _ = select.select([in_socket], [], [], poll_interval)
     if not new_data:
@@ -16,7 +17,7 @@ def start_redirect_blocking(out_addr, in_socket, out_socket, *, bandwidth, globa
     if bandwidth is not None:
       time_to_sleep = len(data) / bandwidth
       time.sleep(time_to_sleep)
-    out_socket.sendto(data, out_addr)
+    out_socket.sendto(data, out_address)
 
 
 def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, bandwidth, global_state):
@@ -26,7 +27,12 @@ def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket
 
 
 def redirect_udp(
-  in_port: int, out_port: int, *, bandwidth: float | None, global_state: GlobalState, hostname: str = "", poll_interval: float = 0.1
+  server_address: HostnameAndPort,
+  new_server_address: HostnameAndPort,
+  *,
+  bandwidth: float | None,
+  global_state: GlobalState,
+  poll_interval: float = 0.1,
 ):
   client_address_to_socket_and_thread = dict()
 
@@ -34,7 +40,7 @@ def redirect_udp(
   with RunIfException(lambda: out_socket.close()):
     global_state.add_socket(out_socket)
   with RunFinally(lambda: global_state.close_socket(out_socket)):
-    out_socket.bind((hostname, out_port))
+    out_socket.bind(new_server_address.to_address())
     buffer_size = 65537
 
     while not global_state.is_shutdown():
@@ -65,7 +71,7 @@ def redirect_udp(
       if bandwidth is not None:
         time_to_sleep = len(message) / bandwidth
         time.sleep(time_to_sleep)
-      server_client_socket.sendto(message, ("localhost", in_port))
+      server_client_socket.sendto(message, server_address.to_address())
 
     out_socket.shutdown(socket.SHUT_RDWR)
     for sock, _ in client_address_to_socket_and_thread.items():
