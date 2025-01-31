@@ -14,7 +14,7 @@ You should think about `localhost-throttle` as a wrapper around your server.<br>
 
 ## Example:
 ```
-localhost-throttle --server-port 8000 --new-server-port 8001 --protocols tcp --bandwidth 100000
+localhost-throttle --server localhost:8000 --new-server 0.0.0.0:8001 --protocols tcp --bandwidth 100000
 ```
 
 ## Current features
