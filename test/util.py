@@ -13,12 +13,9 @@ def is_windows():
   return sys.platform == "win32"
 
 
-def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
+def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None, run_with_ctrl_handler=True):
   creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if is_windows() else 0
   args = [
-    sys.executable,
-    "-m",
-    "test.run_with_ctrl_handler",
     sys.executable,
     "-m",
     MODULE_NAME,
@@ -29,6 +26,8 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
     "--protocols",
     str(protocols),
   ]
+  if run_with_ctrl_handler:
+    args = [sys.executable, "-m", "test.run_with_ctrl_handler"] + args
   if bandwidth is not None:
     args.extend(["--bandwidth", str(bandwidth)])
   return subprocess.Popen(
