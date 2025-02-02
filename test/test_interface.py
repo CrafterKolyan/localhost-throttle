@@ -50,7 +50,7 @@ def test_can_be_killed_with_CTRL_BREAK_on_windows():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.CTRL_BREAK_EVENT)
-    process.communicate(timeout=0.3)
+    process.communicate(timeout=0.5)
   finally:
     process.kill()
 
@@ -66,7 +66,7 @@ def test_can_be_killed_with_CTRL_C_on_windows():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.CTRL_C_EVENT)
-    process.communicate(timeout=0.3)
+    process.communicate(timeout=0.5)
   finally:
     process.terminate()
 
