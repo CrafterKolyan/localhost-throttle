@@ -7,7 +7,7 @@ import pytest
 
 from localhost_throttle import Protocol, ProtocolSet
 
-from .constants import DEFAULT_CWD, MODULE_NAME, DELAY_TO_START_UP
+from .constants import DEFAULT_CWD, MODULE_NAME, DELAY_TO_START_UP, TIME_FOR_PROCESS_TO_FINISH
 from .util import spawn_localhost_throttle, random_ports, is_windows
 
 
@@ -50,7 +50,7 @@ def test_can_be_killed_with_CTRL_BREAK_on_windows():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.CTRL_BREAK_EVENT)
-    process.communicate(timeout=0.5)
+    process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
   finally:
     process.kill()
 
@@ -66,7 +66,7 @@ def test_can_be_killed_with_CTRL_C_on_windows():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.CTRL_C_EVENT)
-    process.communicate(timeout=0.5)
+    process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
   finally:
     process.terminate()
 
@@ -82,6 +82,38 @@ def test_can_be_killed_with_SIGINT_on_linux():
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
     process.send_signal(signal.SIGINT)
-    process.communicate(timeout=0.3)
+    process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
+  finally:
+    process.kill()
+
+
+@pytest.mark.timeout(3)
+@pytest.mark.skipif(is_windows(), reason="Exits after SIGTERM on Linux")
+def test_can_be_killed_with_SIGTERM_on_linux():
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  in_port, out_port = random_ports(socket_type, size=2)
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
+  try:
+    # Give some time to start up
+    time.sleep(DELAY_TO_START_UP)
+    process.send_signal(signal.SIGTERM)
+    process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
+  finally:
+    process.kill()
+
+
+@pytest.mark.timeout(3)
+@pytest.mark.skipif(is_windows(), reason="Exits after SIGKILL on Linux")
+def test_can_be_killed_with_SIGKILL_on_linux():
+  protocol = Protocol.TCP
+  socket_type = protocol.socket_type()
+  in_port, out_port = random_ports(socket_type, size=2)
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
+  try:
+    # Give some time to start up
+    time.sleep(DELAY_TO_START_UP)
+    process.send_signal(signal.SIGKILL)
+    process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
   finally:
     process.kill()
