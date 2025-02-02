@@ -11,7 +11,7 @@ def create_parser():
     "--server-address",
     type=HostnameAndPort.from_string,
     required=True,
-    help='address on which the original server is located in the format "hostname:port". `localhost-throttle` subscribes to it',
+    help='address on which the original server is located in the format "host:port". "localhost-throttle" subscribes to it',
   )
   parser.add_argument(
     "--new-server",
@@ -19,7 +19,7 @@ def create_parser():
     "--new-server-address",
     type=HostnameAndPort.from_string,
     required=True,
-    help="bind new server to this address. New server is handled by `localhost-throttle`. Clients should connect to new server",
+    help='bind new server to this address. Format: "host:port" New server is handled by "localhost-throttle". Clients should connect to new server',
   )
   parser.add_argument(
     "--protocols",
