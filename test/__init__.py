@@ -1,3 +1,3 @@
-from . import constants, main
+from . import constants, main, util
 
-__all__ = ["constants", "main"]
+__all__ = ["constants", "main", "util"]

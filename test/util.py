@@ -9,9 +9,16 @@ from localhost_throttle import Protocol, ProtocolSet
 from .constants import DEFAULT_CWD, MODULE_NAME, DELAY_TO_START_UP
 
 
+def is_windows():
+  return sys.platform == "win32"
+
+
 def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
-  creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0
+  creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if is_windows() else 0
   args = [
+    sys.executable,
+    "-m",
+    "test.run_with_ctrl_handler",
     sys.executable,
     "-m",
     MODULE_NAME,
