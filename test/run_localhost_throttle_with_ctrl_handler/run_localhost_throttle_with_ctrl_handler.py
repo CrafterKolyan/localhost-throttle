@@ -1,4 +1,4 @@
-import subprocess
+import localhost_throttle
 
 from ..util import is_windows
 
@@ -6,7 +6,7 @@ if is_windows():
   import win32api
 
 
-def run_with_ctrl_handler(*arguments):
+def localhost_throttle_with_ctrl_handler():
   if is_windows():
     win32api.SetConsoleCtrlHandler(None, False)
-  subprocess.run(arguments)
+  localhost_throttle.main()

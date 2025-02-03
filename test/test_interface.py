@@ -93,9 +93,7 @@ def test_can_be_killed_with_SIGTERM_on_linux():
   protocol = Protocol.TCP
   socket_type = protocol.socket_type()
   in_port, out_port = random_ports(socket_type, size=2)
-  process = spawn_localhost_throttle(
-    in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), run_with_ctrl_handler=False
-  )
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
   try:
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)
@@ -111,9 +109,7 @@ def test_can_be_killed_with_SIGKILL_on_linux():
   protocol = Protocol.TCP
   socket_type = protocol.socket_type()
   in_port, out_port = random_ports(socket_type, size=2)
-  process = spawn_localhost_throttle(
-    in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), run_with_ctrl_handler=False
-  )
+  process = spawn_localhost_throttle(in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]))
   try:
     # Give some time to start up
     time.sleep(DELAY_TO_START_UP)

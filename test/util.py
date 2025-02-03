@@ -6,19 +6,19 @@ import time
 
 from localhost_throttle import Protocol, ProtocolSet
 
-from .constants import DEFAULT_CWD, MODULE_NAME, DELAY_TO_START_UP
+from .constants import DEFAULT_CWD, DELAY_TO_START_UP
 
 
 def is_windows():
   return sys.platform == "win32"
 
 
-def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None, run_with_ctrl_handler=True):
+def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
   creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if is_windows() else 0
   args = [
     sys.executable,
     "-m",
-    MODULE_NAME,
+    "test.run_localhost_throttle_with_ctrl_handler",
     "--server",
     f"localhost:{in_port}",
     "--new-server",
@@ -26,8 +26,6 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None, ru
     "--protocols",
     str(protocols),
   ]
-  if run_with_ctrl_handler:
-    args = [sys.executable, "-m", "test.run_with_ctrl_handler"] + args
   if bandwidth is not None:
     args.extend(["--bandwidth", str(bandwidth)])
   return subprocess.Popen(
