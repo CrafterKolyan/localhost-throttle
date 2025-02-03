@@ -1,12 +1,12 @@
 import logging
 import select
 import socket
-import time
 import threading
 
 from .context_util import RunIfException, RunFinally
 from .global_state import GlobalState
 from .hostname_and_port import HostnameAndPort
+from .util import sleep_with_poll
 
 
 class RedirectClientTCP:
@@ -48,7 +48,7 @@ class RedirectClientTCP:
           break
         if bandwidth is not None:
           time_to_wait = data_length / bandwidth
-          time.sleep(time_to_wait)
+          sleep_with_poll(time_to_wait, poll_interval=self.poll_interval, global_state=global_state)
 
         out_socket.send(data)
       except (OSError, ValueError):

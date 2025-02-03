@@ -1,11 +1,11 @@
 import logging
 import select
 import socket
-import time
 
 from .context_util import RunIfException, RunFinally
 from .global_state import GlobalState
 from .hostname_and_port import HostnameAndPort
+from .util import sleep_with_poll
 
 
 def start_redirect_blocking(out_address, in_socket, out_socket, *, bandwidth, global_state, buffer_size=65536, poll_interval=0.1):
@@ -16,7 +16,7 @@ def start_redirect_blocking(out_address, in_socket, out_socket, *, bandwidth, gl
     data, _ = in_socket.recvfrom(buffer_size)
     if bandwidth is not None:
       time_to_sleep = len(data) / bandwidth
-      time.sleep(time_to_sleep)
+      sleep_with_poll(time_to_sleep, poll_interval=poll_interval, global_state=global_state)
     out_socket.sendto(data, out_address)
 
 
@@ -70,7 +70,7 @@ def redirect_udp(
 
       if bandwidth is not None:
         time_to_sleep = len(message) / bandwidth
-        time.sleep(time_to_sleep)
+        sleep_with_poll(time_to_sleep, poll_interval=poll_interval, global_state=global_state)
       server_client_socket.sendto(message, server_address.to_address())
 
     out_socket.shutdown(socket.SHUT_RDWR)

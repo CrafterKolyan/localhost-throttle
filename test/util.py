@@ -1,4 +1,5 @@
 import contextlib
+import signal
 import socket
 import subprocess
 import sys
@@ -36,6 +37,14 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
     cwd=DEFAULT_CWD,
     creationflags=creationflags,
   )
+
+
+def interrupt_process(process):
+  if is_windows():
+    signal_to_send = signal.CTRL_C_EVENT
+  else:
+    signal_to_send = signal.SIGINT
+  process.send_signal(signal_to_send)
 
 
 def random_ports(socket_type, size=None):
