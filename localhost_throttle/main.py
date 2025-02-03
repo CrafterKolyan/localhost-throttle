@@ -45,8 +45,9 @@ def localhost_throttle(
   *,
   bandwidth: float | None,
   poll_interval: float = 0.01,
+  log_level: int,
 ):
-  logging.basicConfig(format="%(asctime)s\t%(filename)s:%(lineno)s\t%(levelname)s\t%(message)s", level=logging.INFO)
+  logging.basicConfig(format="%(asctime)s\t%(filename)s:%(lineno)s\t%(levelname)s\t%(message)s", level=log_level)
   global_state = GlobalState()
   for protocol in protocols:
     global_state.add_thread(
@@ -66,4 +67,4 @@ def localhost_throttle(
 def main():
   parser = create_parser()
   args = parser.parse_args()
-  localhost_throttle(args.server, args.new_server, args.protocols, bandwidth=args.bandwidth)
+  localhost_throttle(args.server, args.new_server, args.protocols, bandwidth=args.bandwidth, log_level=args.log_level)

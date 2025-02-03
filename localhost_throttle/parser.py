@@ -1,6 +1,12 @@
 import argparse
+import logging
+
 from .protocol_type import ProtocolSet
 from .hostname_and_port import HostnameAndPort
+
+
+def parse_log_level(str_: str):
+  return logging.getLevelName(str_.upper())
 
 
 def create_parser():
@@ -30,4 +36,5 @@ def create_parser():
   parser.add_argument(
     "--bandwidth", type=float, required=False, help="Bandwidth in bytes per second. Can be ommitted for unlimited"
   )
+  parser.add_argument("--log-level", type=parse_log_level, required=False, help="Logging level")
   return parser
