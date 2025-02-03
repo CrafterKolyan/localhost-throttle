@@ -18,8 +18,8 @@ class RedirectClientTCP:
     *,
     bandwidth: float | None,
     global_state: GlobalState,
+    poll_interval: float,
     buffer_size: int = 65536,
-    poll_interval: float = 0.01,
   ):
     self.in_socket = in_socket
     self.out_socket = out_socket
@@ -65,14 +65,22 @@ class RedirectClientTCP:
 
 
 def redirect_and_close_on_exception_tcp(
-  *, client_socket, client_address, server_address: HostnameAndPort, bandwidth: float | None, global_state: GlobalState
+  *,
+  client_socket,
+  client_address,
+  server_address: HostnameAndPort,
+  bandwidth: float | None,
+  poll_interval: float,
+  global_state: GlobalState,
 ):
   with RunFinally(lambda: global_state.close_socket(client_socket)):
     in_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     global_state.add_socket(in_socket)
     with RunFinally(lambda: global_state.close_socket(in_socket)):
       in_socket.connect(server_address.to_address())
-      redirect_in_to_client = RedirectClientTCP(in_socket, client_socket, bandwidth=bandwidth, global_state=global_state)
+      redirect_in_to_client = RedirectClientTCP(
+        in_socket, client_socket, bandwidth=bandwidth, poll_interval=poll_interval, global_state=global_state
+      )
       redirect_in_to_client.start()
       logging.info(f"Opened TCP connection to {client_address}")
       redirect_in_to_client._stopped.wait()
@@ -82,15 +90,14 @@ def redirect_and_close_on_exception_tcp(
 
 
 # TODO: Make request_queue_size configurable
-# TODO: Make poll_interval configurable
 def redirect_tcp(
   server_address: HostnameAndPort,
   new_server_address: HostnameAndPort,
   *,
   bandwidth: float | None,
   global_state: GlobalState,
+  poll_interval: float,
   request_queue_size: int = 100,
-  poll_interval: float = 0.1,
 ):
   out_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   with RunIfException(lambda: out_socket.close()):
@@ -114,6 +121,7 @@ def redirect_tcp(
             "client_address": client_address,
             "server_address": server_address,
             "bandwidth": bandwidth,
+            "poll_interval": poll_interval,
           },
         )
 

@@ -8,7 +8,7 @@ from .hostname_and_port import HostnameAndPort
 from .util import sleep_with_poll
 
 
-def start_redirect_blocking(out_address, in_socket, out_socket, *, bandwidth, global_state, buffer_size=65536, poll_interval=0.1):
+def start_redirect_blocking(out_address, in_socket, out_socket, *, bandwidth, global_state, poll_interval, buffer_size=65536):
   while not global_state.is_shutdown():
     new_data, _, _ = select.select([in_socket], [], [], poll_interval)
     if not new_data:
@@ -20,9 +20,11 @@ def start_redirect_blocking(out_address, in_socket, out_socket, *, bandwidth, gl
     out_socket.sendto(data, out_address)
 
 
-def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, bandwidth, global_state):
+def redirect_and_close_on_exception_udp(*, client_address, out_socket, in_socket, bandwidth, poll_interval, global_state):
   logging.info(f"Opened UDP connection to {client_address}")
-  start_redirect_blocking(client_address, in_socket, out_socket, bandwidth=bandwidth, global_state=global_state)
+  start_redirect_blocking(
+    client_address, in_socket, out_socket, bandwidth=bandwidth, poll_interval=poll_interval, global_state=global_state
+  )
   logging.info(f"Closed UDP connection to {client_address}")
 
 
@@ -32,7 +34,7 @@ def redirect_udp(
   *,
   bandwidth: float | None,
   global_state: GlobalState,
-  poll_interval: float = 0.1,
+  poll_interval: float,
 ):
   client_address_to_socket_and_thread = dict()
 
@@ -62,6 +64,7 @@ def redirect_udp(
               "out_socket": out_socket,
               "in_socket": server_client_socket,
               "bandwidth": bandwidth,
+              "poll_interval": poll_interval,
             },
           )
           client_address_to_socket_and_thread[client_address] = (server_client_socket, thread)

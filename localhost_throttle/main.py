@@ -16,7 +16,7 @@ def redirect(
   bandwidth: float | None,
   global_state: GlobalState,
   request_queue_size: int = 100,
-  poll_interval: float = 0.1,
+  poll_interval: float = 0.01,
 ):
   match protocol:
     case Protocol.TCP:
@@ -67,4 +67,11 @@ def localhost_throttle(
 def main():
   parser = create_parser()
   args = parser.parse_args()
-  localhost_throttle(args.server, args.new_server, args.protocols, bandwidth=args.bandwidth, log_level=args.log_level)
+  localhost_throttle(
+    args.server,
+    args.new_server,
+    args.protocols,
+    bandwidth=args.bandwidth,
+    poll_interval=args.poll_interval,
+    log_level=args.log_level,
+  )

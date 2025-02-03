@@ -4,6 +4,8 @@ import logging
 from .protocol_type import ProtocolSet
 from .hostname_and_port import HostnameAndPort
 
+default_poll_interval = 0.01
+
 
 def parse_log_level(str_: str):
   return logging.getLevelName(str_.upper())
@@ -35,6 +37,13 @@ def create_parser():
   )
   parser.add_argument(
     "--bandwidth", type=float, required=False, help="Bandwidth in bytes per second. Can be ommitted for unlimited"
+  )
+  parser.add_argument(
+    "--poll-interval",
+    type=float,
+    default=default_poll_interval,
+    required=False,
+    help=f'Polling interval for blocking calls. This value controls how fast "localhost-throttle" responds to user actions like Ctrl+C. (default: {default_poll_interval})',
   )
   parser.add_argument("--log-level", type=parse_log_level, required=False, help="Logging level")
   return parser
