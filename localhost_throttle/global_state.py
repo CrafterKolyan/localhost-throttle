@@ -147,7 +147,11 @@ class GlobalState:
         for thread_id in self.finished_threads:
           future, _ = self.thread_id_to_thread[thread_id]
           self._join_thread(thread_id)
-          logging.debug(f"Finished thread {thread_id} -> {future.result()}")
+          exception = future.exception()
+          if exception is not None:
+            logging.debug(f"Finished thread {thread_id} with exception:\n{exception!r}")
+          else:
+            logging.debug(f"Finished thread {thread_id} -> {future.result()}")
         self.finished_threads = []
 
         for socket_id in self.added_sockets:

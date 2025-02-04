@@ -57,7 +57,7 @@ def localhost_throttle(
     )
   try:
     global_state.monitor_forever(poll_interval=poll_interval)
-  except KeyboardInterrupt:
+  except BaseException:
     global_state.shutdown()
     all_threads_joined = global_state.join()
     if not all_threads_joined:
