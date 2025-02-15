@@ -92,7 +92,6 @@ class TCPSingleConnectionTest:
           in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), bandwidth=self.bandwidth
         )
         with context_util.RunIfException(lambda: self._process.kill()):
-          # TODO: Due to this `time.sleep` correct handling of resources becomes even more critical. Really want to use `RunIfException`
           time.sleep(DELAY_TO_START_UP)
 
           out_socket.connect(("localhost", out_port))
@@ -126,7 +125,6 @@ class UDPSingleConnectionTest:
     socket_type = protocol.socket_type()
     in_socket = socket.socket(socket.AF_INET, socket_type)
     with context_util.RunIfException(lambda: in_socket.close()):
-      # TODO: Need to use `RunIfException` here in case the exception is thrown here
       in_socket.bind(("localhost", 0))
       in_port = in_socket.getsockname()[1]
       out_port = random_ports(socket_type)
@@ -138,7 +136,6 @@ class UDPSingleConnectionTest:
         )
         with context_util.RunIfException(lambda: self._process.kill()):
           self._out_port = out_port
-          # TODO: Due to this `time.sleep` `RunIfException` becomes even more critical
           time.sleep(DELAY_TO_START_UP)
     return (self._in_socket, self._out_socket, self._process, self._out_port)
 
