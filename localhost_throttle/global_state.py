@@ -106,11 +106,9 @@ class GlobalState:
       self.condition.notify_all()
 
   def _notify_finished_thread(self, thread_id):
-    # TODO: Try to still do notifications even on shutdown
-    if not self.is_shutdown():
-      with self:
-        self.finished_threads.append(thread_id)
-        self.notify_monitor()
+    with self:
+      self.finished_threads.append(thread_id)
+      self.notify_monitor()
 
   def shutdown(self):
     self._is_shutdown.set()
@@ -176,5 +174,5 @@ class GlobalState:
       return self.lock.acquire()
 
   def __exit__(self, exc_type, exc_val, exc_tb):
-    with RunFinally(lambda: self.lock.release()):
-      pass
+    with RunIfException(lambda: self.lock.release()):
+      self.lock.release()
