@@ -105,9 +105,6 @@ class TCPSingleConnectionTest:
       with contextlib.closing(self._out_socket):
         with contextlib.closing(self._in_socket_out):
           with context_util.RunIfException(lambda: self._process.kill()):
-            # TODO: For some reason we need to wait a little bit. Something weird happens with joining threads on Windows otherwise.
-            # We need to understand why and fix the underlying issue.
-            time.sleep(TIME_FOR_PROCESS_TO_FINISH)
             interrupt_process(self._process)
             self._process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
 

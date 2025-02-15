@@ -4,6 +4,8 @@ import threading
 from concurrent.futures import Future
 from collections import defaultdict
 
+from .context_util import RunIfException, RunFinally
+
 
 class GlobalState:
   def __init__(self):
@@ -168,7 +170,9 @@ class GlobalState:
         first_update = False
 
   def __enter__(self):
-    return self.lock.__enter__()
+    with RunIfException(lambda: self.lock.release()):
+      return self.lock.acquire()
 
   def __exit__(self, exc_type, exc_val, exc_tb):
-    return self.lock.__exit__(exc_type, exc_val, exc_tb)
+    with RunFinally(lambda: self.lock.release()):
+      pass
