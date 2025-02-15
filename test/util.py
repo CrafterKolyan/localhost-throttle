@@ -7,7 +7,7 @@ import time
 
 from localhost_throttle import Protocol, ProtocolSet, context_util
 
-from .constants import DEFAULT_CWD, DELAY_TO_START_UP
+from .constants import DEFAULT_CWD, DELAY_TO_START_UP, TIME_FOR_PROCESS_TO_FINISH
 
 
 def is_windows():
@@ -26,6 +26,8 @@ def spawn_localhost_throttle(*, in_port, out_port, protocols, bandwidth=None):
     f"localhost:{out_port}",
     "--protocols",
     str(protocols),
+    "--log-level",
+    "debug",
   ]
   if bandwidth is not None:
     args.extend(["--bandwidth", str(bandwidth)])
@@ -103,7 +105,12 @@ class TCPSingleConnectionTest:
     with contextlib.closing(self._in_socket):
       with contextlib.closing(self._out_socket):
         with contextlib.closing(self._in_socket_out):
-          self._process.kill()
+          with context_util.RunIfException(lambda: self._process.kill()):
+            # TODO: For some reason we need to wait a little bit. Something weird happens with joining threads on Windows otherwise.
+            # We need to understand why and fix the underlying issue.
+            time.sleep(0.01)
+            interrupt_process(self._process)
+            self._process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
 
 
 class UDPSingleConnectionTest:

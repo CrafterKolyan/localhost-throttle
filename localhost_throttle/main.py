@@ -59,7 +59,7 @@ def localhost_throttle(
     global_state.monitor_forever(poll_interval=poll_interval)
   except BaseException:
     global_state.shutdown()
-    all_threads_joined = global_state.join()
+    all_threads_joined = global_state.join(timeout=1)
     if not all_threads_joined:
       raise RuntimeError("Not all threads joined in the end")
 

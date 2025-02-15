@@ -114,12 +114,14 @@ class GlobalState:
   def is_shutdown(self):
     return self._is_shutdown.isSet()
 
-  def join(self, timeout=1):
+  def join(self, timeout=None):
     current_thread_id = self.thread_ident_to_thread_id[threading.get_ident()]
     all_threads_joined = True
-    for thread_id, (_, thread) in self.thread_id_to_thread.items():
+    thread_ids = sorted(self.thread_id_to_thread.keys(), reverse=True)
+    for thread_id in thread_ids:
       if thread_id == current_thread_id:
         continue
+      _, thread = self.thread_id_to_thread[thread_id]
       thread.join(timeout=timeout)
       all_threads_joined &= not thread.is_alive()
     return all_threads_joined
