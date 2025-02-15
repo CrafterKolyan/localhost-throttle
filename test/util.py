@@ -145,4 +145,6 @@ class UDPSingleConnectionTest:
   def __exit__(self, exc_type, exc_value, traceback):
     with contextlib.closing(self._in_socket):
       with contextlib.closing(self._out_socket):
-        self._process.kill()
+        with context_util.RunIfException(lambda: self._process.kill()):
+          interrupt_process(self._process)
+          self._process.communicate(timeout=TIME_FOR_PROCESS_TO_FINISH)
