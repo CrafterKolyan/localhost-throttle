@@ -5,7 +5,7 @@ import subprocess
 import sys
 import time
 
-from localhost_throttle import Protocol, ProtocolSet
+from localhost_throttle import Protocol, ProtocolSet, context_util
 
 from .constants import DEFAULT_CWD, DELAY_TO_START_UP
 
@@ -76,10 +76,9 @@ class TCPSingleConnectionTest:
     protocol = Protocol.TCP
     socket_type = protocol.socket_type()
     in_socket = socket.socket(socket.AF_INET, socket_type)
-    # TODO: Need to use `RunIfException` here to prettify code
-    try:
+    with context_util.RunIfException(lambda: in_socket.close()):
       out_socket = socket.socket(socket.AF_INET, socket_type)
-      try:
+      with context_util.RunIfException(lambda: out_socket.close()):
         in_socket.bind(("localhost", 0))
         in_socket.listen(1)
         in_port = in_socket.getsockname()[1]
@@ -90,22 +89,14 @@ class TCPSingleConnectionTest:
         self._process = spawn_localhost_throttle(
           in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), bandwidth=self.bandwidth
         )
-        try:
+        with context_util.RunIfException(lambda: self._process.kill()):
           # TODO: Due to this `time.sleep` correct handling of resources becomes even more critical. Really want to use `RunIfException`
           time.sleep(DELAY_TO_START_UP)
 
           out_socket.connect(("localhost", out_port))
           in_socket_out, _ = in_socket.accept()
-          try:
+          with context_util.RunIfException(lambda: in_socket_out.close()):
             self._in_socket_out = in_socket_out
-          except BaseException:
-            in_socket_out.close()
-        except BaseException:
-          self._process.close()
-      except BaseException:
-        out_socket.close()
-    except BaseException:
-      in_socket.close()
     return (self._in_socket_out, self._out_socket, self._process)
 
   def __exit__(self, exc_type, exc_value, traceback):
@@ -127,27 +118,21 @@ class UDPSingleConnectionTest:
     protocol = Protocol.UDP
     socket_type = protocol.socket_type()
     in_socket = socket.socket(socket.AF_INET, socket_type)
-    try:
+    with context_util.RunIfException(lambda: in_socket.close()):
       # TODO: Need to use `RunIfException` here in case the exception is thrown here
       in_socket.bind(("localhost", 0))
       in_port = in_socket.getsockname()[1]
       out_port = random_ports(socket_type)
       self._in_socket = in_socket
       self._out_socket = socket.socket(socket.AF_INET, socket_type)
-      try:
+      with context_util.RunIfException(lambda: self._out_socket.close()):
         self._process = spawn_localhost_throttle(
           in_port=in_port, out_port=out_port, protocols=ProtocolSet.from_iterable([protocol]), bandwidth=self.bandwidth
         )
-        try:
+        with context_util.RunIfException(lambda: self._process.kill()):
           self._out_port = out_port
           # TODO: Due to this `time.sleep` `RunIfException` becomes even more critical
           time.sleep(DELAY_TO_START_UP)
-        except BaseException:
-          self._process.kill()
-      except BaseException:
-        self._out_socket.close()
-    except BaseException:
-      in_socket.close()
     return (self._in_socket, self._out_socket, self._process, self._out_port)
 
   def __exit__(self, exc_type, exc_value, traceback):
