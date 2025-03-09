@@ -4,7 +4,7 @@ import threading
 from concurrent.futures import Future
 from collections import defaultdict
 
-from .context_util import RunIfException, RunFinally
+from .context_util import RunIfException
 
 
 class GlobalState:
