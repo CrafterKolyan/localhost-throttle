@@ -43,9 +43,9 @@ def localhost_throttle(
   new_server_address: HostnameAndPort,
   protocols: ProtocolSet,
   *,
-  bandwidth: float | None,
+  bandwidth: float | None = None,
   poll_interval: float = 0.01,
-  log_level: int,
+  log_level: int = logging.INFO,
 ):
   logging.basicConfig(format="%(asctime)s\t%(filename)s:%(lineno)s\t%(levelname)s\t%(message)s", level=log_level)
   global_state = GlobalState()
