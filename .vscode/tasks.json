@@ -4,7 +4,7 @@
     {
       "label": "Run tests",
       "type": "shell",
-      "command": "pytest test -n auto --capture=no",
+      "command": "pytest test -n 4 --capture=no",
       "group": "test",
       "options": { "cwd": "${workspaceFolder}" }
     }
