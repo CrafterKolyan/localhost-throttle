@@ -40,4 +40,4 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: pytest test -n 2 --capture=no
+        run: pytest test -n 1 --capture=no
